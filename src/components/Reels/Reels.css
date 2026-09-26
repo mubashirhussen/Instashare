@@ -579,23 +579,6 @@
   letter-spacing: 0.2px;
 }
 
-.reel-dark-ig-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0095f6;
-  text-decoration: none;
-  margin-top: 2px;
-  transition: opacity 0.15s ease;
-}
-
-.reel-dark-ig-link:hover {
-  opacity: 0.8;
-  text-decoration: underline;
-}
-
 /* 4. Add a comment input form */
 .reel-dark-add-comment-form {
   display: flex;
