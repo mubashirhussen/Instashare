@@ -5,9 +5,16 @@ import {
   BsHeartFill,
   BsHeart,
   BsChatFill,
+  BsChat,
+  BsSend,
+  BsBookmark,
+  BsBookmarkFill,
+  BsThreeDots,
   BsEyeFill,
   BsPatchCheckFill,
   BsMusicNoteBeamed,
+  BsInstagram,
+  BsEmojiSmile,
   BsX,
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
@@ -532,6 +539,12 @@ const Reels = () => {
   const [selectedReelModal, setSelectedReelModal] = useState(null)
   const [modalMuted, setModalMuted] = useState(false)
   const [modalPlaying, setModalPlaying] = useState(true)
+  const [modalLiked, setModalLiked] = useState(false)
+  const [modalLikesCount, setModalLikesCount] = useState(0)
+  const [modalSaved, setModalSaved] = useState(false)
+  const [modalFollowing, setModalFollowing] = useState(false)
+  const [commentText, setCommentText] = useState('')
+  const [modalComments, setModalComments] = useState([])
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
   const modalVideoRef = useRef(null)
 
@@ -550,6 +563,52 @@ const Reels = () => {
     setSelectedReelModal(reel)
     setModalPlaying(true)
     setModalMuted(false)
+    setModalLiked(false)
+    setModalLikesCount(reel.likes_count || 3270)
+    setModalSaved(false)
+    setModalFollowing(false)
+    setCommentText('')
+    setModalComments([
+      {
+        id: 'c1',
+        username: 'pawavarma795',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+        text: '🙌 🔥 Great explanation on loops and syntax!',
+        time: '5w',
+        likes: 1,
+      },
+      {
+        id: 'c2',
+        username: 'dribspyetrocrown',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+        text: '😍 🔥 🔥 Bookmarked for my upcoming technical interview prep!',
+        time: '5w',
+        likes: 3,
+      },
+      {
+        id: 'c3',
+        username: 'tech_explorer',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+        text: 'Clean and concise. Thank you for breaking down the concepts so well! 👏',
+        time: '3w',
+        likes: 2,
+      },
+    ])
+  }
+
+  const handleAddComment = e => {
+    e.preventDefault()
+    if (!commentText.trim()) return
+    const newC = {
+      id: `c_${Date.now()}`,
+      username: 'mubashir_hussen.sk',
+      avatar: '/profile_avatar.jpg',
+      text: commentText.trim(),
+      time: 'Just now',
+      likes: 0,
+    }
+    setModalComments(prev => [...prev, newC])
+    setCommentText('')
   }
 
   const loadReels = () => {
@@ -608,31 +667,37 @@ const Reels = () => {
         </section>
       </main>
 
-      {/* Fullscreen Reel Viewer Modal */}
+      {/* Instagram True Dark Mode Reel Viewer Modal */}
       {selectedReelModal && (
         <div
-          className="reel-modal-backdrop"
+          className="reel-dark-modal-backdrop"
           onClick={() => setSelectedReelModal(null)}
           role="presentation"
         >
+          <button
+            type="button"
+            className="reel-dark-close-corner-btn"
+            onClick={() => setSelectedReelModal(null)}
+            aria-label="Close"
+          >
+            <BsX size={34} />
+          </button>
+
           <div
-            className="reel-modal-card"
+            className="reel-dark-modal-card"
             onClick={e => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
           >
-            <button
-              type="button"
-              className="reel-modal-close-btn"
-              onClick={() => setSelectedReelModal(null)}
-              aria-label="Close modal"
-            >
-              <BsX size={28} />
-            </button>
+            <div className="reel-dark-modal-split">
+              {/* Left Side: Video Media Screen with Instagram Header Overlay */}
+              <div className="reel-dark-media-pane" onClick={toggleModalPlay}>
+                {/* Top-Left Instagram Username Badge */}
+                <div className="reel-media-user-badge">
+                  <BsInstagram className="ig-badge-logo" size={16} />
+                  <span>@{selectedReelModal.user_name}</span>
+                </div>
 
-            <div className="reel-modal-split-layout">
-              {/* Left Side: Seamless 9:16 Full Video Player */}
-              <div className="reel-modal-video-pane" onClick={toggleModalPlay}>
                 <video
                   ref={modalVideoRef}
                   src={selectedReelModal.video_url}
@@ -640,13 +705,13 @@ const Reels = () => {
                   playsInline
                   loop
                   muted={modalMuted}
-                  className="modal-playing-video"
+                  className="reel-dark-video-player"
                 />
 
-                {/* Sound Toggle */}
+                {/* Top-Right Sound Toggle */}
                 <button
                   type="button"
-                  className="modal-video-sound-btn"
+                  className="reel-dark-sound-btn"
                   onClick={e => {
                     e.stopPropagation()
                     setModalMuted(prev => !prev)
@@ -656,65 +721,205 @@ const Reels = () => {
                   {modalMuted ? <FiVolumeX size={16} /> : <FiVolume2 size={16} />}
                 </button>
 
-                {/* Play/Pause Overlay Indicator */}
+                {/* Play/Pause Overlay Center Circle */}
                 {!modalPlaying && (
-                  <div className="modal-video-pause-overlay">
-                    <div className="modal-pause-circle">
-                      <BsPlayFill size={44} />
-                    </div>
+                  <div className="reel-dark-play-indicator">
+                    <BsPlayFill size={48} />
                   </div>
                 )}
               </div>
 
-              {/* Right Side: Creator & Reel Information */}
-              <div className="reel-modal-info-pane">
-                <div className="modal-creator-header">
-                  <img
-                    src={selectedReelModal.profile_pic || '/profile_avatar.jpg'}
-                    alt={selectedReelModal.user_name}
-                    className="modal-creator-avatar"
-                    onError={e => {
-                      e.target.onerror = null
-                      e.target.src = '/profile_avatar.jpg'
-                    }}
-                  />
-                  <div className="modal-creator-meta">
-                    <div className="modal-creator-name-row">
-                      <strong className="modal-creator-username">{selectedReelModal.user_name}</strong>
-                      {selectedReelModal.is_verified && (
-                        <BsPatchCheckFill className="reel-verified-badge" size={14} />
-                      )}
+              {/* Right Side: Instagram Dark Comments & Details Pane */}
+              <div className="reel-dark-details-pane">
+                {/* 1. Header Row */}
+                <div className="reel-dark-header">
+                  <div className="reel-dark-header-user">
+                    <img
+                      src={selectedReelModal.profile_pic || '/profile_avatar.jpg'}
+                      alt={selectedReelModal.user_name}
+                      className="reel-dark-header-avatar"
+                      onError={e => {
+                        e.target.onerror = null
+                        e.target.src = '/profile_avatar.jpg'
+                      }}
+                    />
+                    <div className="reel-dark-header-meta">
+                      <div className="reel-dark-username-row">
+                        <span className="reel-dark-author-name">{selectedReelModal.user_name}</span>
+                        {selectedReelModal.is_verified && (
+                          <BsPatchCheckFill className="reel-verified-badge" size={13} />
+                        )}
+                        <span className="reel-dark-dot">•</span>
+                        <button
+                          type="button"
+                          className={`reel-dark-follow-link ${modalFollowing ? 'following' : ''}`}
+                          onClick={() => setModalFollowing(prev => !prev)}
+                        >
+                          {modalFollowing ? 'Following' : 'Follow'}
+                        </button>
+                      </div>
+                      <span className="reel-dark-subtitle">
+                        {selectedReelModal.tag || 'AI Content • Code'}
+                      </span>
                     </div>
-                    <span className="modal-audio-info">
-                      🎵 {selectedReelModal.audio_info || 'Original Sound'}
-                    </span>
                   </div>
+
+                  <button
+                    type="button"
+                    className="reel-dark-options-btn"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(selectedReelModal.post_link || window.location.href)
+                      alert('Reel link copied to clipboard! 📋')
+                    }}
+                    title="More options"
+                  >
+                    <BsThreeDots size={18} />
+                  </button>
                 </div>
 
-                <div className="modal-caption-area">
-                  <span className="modal-topic-chip">{selectedReelModal.tag || '💻 Code'}</span>
-                  <p className="modal-caption-text">{selectedReelModal.caption}</p>
+                {/* 2. Scrollable Body: Caption & Comments */}
+                <div className="reel-dark-comments-scroll">
+                  {/* Post Caption Row */}
+                  <div className="reel-dark-comment-item caption-item">
+                    <img
+                      src={selectedReelModal.profile_pic || '/profile_avatar.jpg'}
+                      alt={selectedReelModal.user_name}
+                      className="reel-dark-comment-avatar"
+                      onError={e => {
+                        e.target.onerror = null
+                        e.target.src = '/profile_avatar.jpg'
+                      }}
+                    />
+                    <div className="reel-dark-comment-content">
+                      <p className="reel-dark-comment-text">
+                        <strong className="reel-dark-comment-user">{selectedReelModal.user_name}</strong>{' '}
+                        {selectedReelModal.caption}
+                      </p>
+                      <div className="reel-dark-comment-meta">
+                        <span>5w</span>
+                        <button type="button" className="meta-action-btn">See translation</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Comments List */}
+                  {modalComments.map(comment => (
+                    <div key={comment.id} className="reel-dark-comment-item">
+                      <img
+                        src={comment.avatar}
+                        alt={comment.username}
+                        className="reel-dark-comment-avatar"
+                        onError={e => {
+                          e.target.onerror = null
+                          e.target.src = '/profile_avatar.jpg'
+                        }}
+                      />
+                      <div className="reel-dark-comment-content">
+                        <p className="reel-dark-comment-text">
+                          <strong className="reel-dark-comment-user">{comment.username}</strong>{' '}
+                          {comment.text}
+                        </p>
+                        <div className="reel-dark-comment-meta">
+                          <span>{comment.time}</span>
+                          {comment.likes > 0 && <span>{comment.likes} like</span>}
+                          <button
+                            type="button"
+                            className="meta-action-btn"
+                            onClick={() => setCommentText(`@${comment.username} `)}
+                          >
+                            Reply
+                          </button>
+                        </div>
+                      </div>
+                      <button type="button" className="comment-like-heart" title="Like comment">
+                        <BsHeart size={12} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="modal-reel-stats-bar">
-                  <span>❤️ {selectedReelModal.likes_count?.toLocaleString()} likes</span>
-                  <span>💬 {selectedReelModal.comments_count?.toLocaleString()} comments</span>
-                  <span>👁️ {selectedReelModal.views} views</span>
-                </div>
+                {/* 3. Bottom Action Bar */}
+                <div className="reel-dark-bottom-section">
+                  <div className="reel-dark-action-buttons">
+                    <div className="action-buttons-left">
+                      <button
+                        type="button"
+                        className={`reel-dark-icon-btn ${modalLiked ? 'liked' : ''}`}
+                        onClick={() => {
+                          if (modalLiked) {
+                            setModalLiked(false)
+                            setModalLikesCount(prev => Math.max(0, prev - 1))
+                          } else {
+                            setModalLiked(true)
+                            setModalLikesCount(prev => prev + 1)
+                          }
+                        }}
+                        aria-label="Like"
+                      >
+                        {modalLiked ? <BsHeartFill color="#ff3040" size={22} /> : <BsHeart size={22} />}
+                      </button>
+                      <button type="button" className="reel-dark-icon-btn" aria-label="Comment">
+                        <BsChat size={22} />
+                      </button>
+                      <button
+                        type="button"
+                        className="reel-dark-icon-btn"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(selectedReelModal.post_link || window.location.href)
+                          alert('Reel link copied! 📋')
+                        }}
+                        aria-label="Share"
+                      >
+                        <BsSend size={22} />
+                      </button>
+                    </div>
 
-                {selectedReelModal.post_link && (
-                  <div className="modal-reel-link-action">
+                    <button
+                      type="button"
+                      className="reel-dark-icon-btn"
+                      onClick={() => setModalSaved(prev => !prev)}
+                      aria-label="Save"
+                    >
+                      {modalSaved ? <BsBookmarkFill color="#ffffff" size={22} /> : <BsBookmark size={22} />}
+                    </button>
+                  </div>
+
+                  <div className="reel-dark-likes-row">
+                    <strong>{modalLikesCount.toLocaleString()} likes</strong>
+                  </div>
+                  <span className="reel-dark-date-label">August 15</span>
+
+                  {selectedReelModal.post_link && (
                     <a
                       href={selectedReelModal.post_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="open-instagram-reel-btn"
+                      className="reel-dark-ig-link"
                     >
-                      <span>Watch Reel on Instagram</span>
-                      <span className="external-link-arrow">↗</span>
+                      <BsInstagram size={13} />
+                      <span>Watch Reel on Instagram ↗</span>
                     </a>
-                  </div>
-                )}
+                  )}
+
+                  {/* 4. Add a comment input form */}
+                  <form className="reel-dark-add-comment-form" onSubmit={handleAddComment}>
+                    <button type="button" className="comment-emoji-btn" aria-label="Insert Emoji">
+                      <BsEmojiSmile size={20} />
+                    </button>
+                    <input
+                      type="text"
+                      className="comment-text-input"
+                      placeholder="Add a comment..."
+                      value={commentText}
+                      onChange={e => setCommentText(e.target.value)}
+                    />
+                    {commentText.trim() && (
+                      <button type="submit" className="comment-post-btn">
+                        Post
+                      </button>
+                    )}
+                  </form>
+                </div>
               </div>
             </div>
           </div>
