@@ -1,0 +1,190 @@
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-form-container {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border: 1px solid #dbdbdb;
+  border-radius: 12px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.login-logo-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.website-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  margin: 10px 0 2px;
+  color: #262626;
+  letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: #737373;
+  margin: 0;
+  text-align: center;
+}
+
+/* Tab Toggle */
+.auth-tab-toggle {
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 3px;
+  margin-bottom: 22px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #737373;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab-btn.active {
+  background-color: #ffffff;
+  color: #0095f6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.login-form {
+  width: 100%;
+}
+
+.input-container {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.input-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #262626;
+  margin-bottom: 5px;
+  letter-spacing: 0.4px;
+}
+
+.login-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  background-color: #fafafa;
+  color: #262626;
+  font-size: 13.5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.login-input:focus {
+  border-color: #0095f6;
+  background-color: #ffffff;
+}
+
+.login-input::placeholder {
+  color: #8e8e8e;
+}
+
+.login-button {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #0095f6;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #1877f2;
+}
+
+.login-button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.login-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ed4956;
+  font-size: 12.5px;
+  text-align: center;
+  margin: 6px 0 10px;
+  font-weight: 500;
+}
+
+.success-message {
+  color: #00ba7c;
+  font-size: 12.5px;
+  text-align: center;
+  margin: 6px 0 10px;
+  font-weight: 600;
+}
+
+.auth-footer-switch {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #efefef;
+  text-align: center;
+}
+
+.auth-footer-switch p {
+  font-size: 13px;
+  color: #737373;
+  margin: 0;
+}
+
+.switch-link-btn {
+  background: transparent;
+  border: none;
+  color: #0095f6;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.switch-link-btn:hover {
+  text-decoration: underline;
+}
