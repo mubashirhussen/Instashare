@@ -387,9 +387,13 @@ export const PostCard = ({ post, onClickUser }) => {
         >
           <div className="post-header-avatar-ring">
             <img
-              src={post.profile_pic}
+              src={post.profile_pic || '/profile_avatar.jpg'}
               alt={post.user_name}
               className="post-header-avatar"
+              onError={e => {
+                e.target.onerror = null
+                e.target.src = '/profile_avatar.jpg'
+              }}
             />
           </div>
           <div className="post-header-text">

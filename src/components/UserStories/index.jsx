@@ -4,41 +4,53 @@ import 'slick-carousel/slick/slick-theme.css'
 import { IoChevronForward, IoChevronBack } from 'react-icons/io5'
 import './index.css'
 
+const FALLBACK_AVATAR = '/profile_avatar.jpg'
+
 const DEFAULT_STORIES = [
   {
     user_id: 'user_shafi_07',
     user_name: 'shafi _07',
-    story_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_nani',
     user_name: 'Nani 🤗',
-    story_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_anu',
     user_name: '♡__ANU__♡',
-    story_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_harsha',
     user_name: 'Harsha...',
-    story_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_pycode',
     user_name: 'pycode.dev',
-    story_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_codenloop',
     user_name: 'codenloop',
-    story_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop',
   },
   {
     user_id: 'user_flm',
     user_name: 'flm_pronetwork',
-    story_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop',
+    story_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop',
+  },
+  {
+    user_id: 'user_yashwanth',
+    user_name: 'Yashwanth',
+    story_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop',
+  },
+  {
+    user_id: 'user_ramakrishna',
+    user_name: 'Ramakrishna',
+    story_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop',
   },
 ]
 
@@ -128,9 +140,13 @@ const UserStories = ({ stories = [], onClickStory }) => {
             <div className="story-gradient-ring">
               <div className="story-white-gap">
                 <img
-                  src={story.story_url}
+                  src={story.story_url || FALLBACK_AVATAR}
                   alt={story.user_name}
                   className="story-avatar-img"
+                  onError={e => {
+                    e.target.onerror = null
+                    e.target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop'
+                  }}
                 />
               </div>
             </div>
