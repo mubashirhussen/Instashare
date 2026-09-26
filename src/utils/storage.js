@@ -199,7 +199,16 @@ export const getCustomFeedPosts = () => {
   const saved = localStorage.getItem('instashare_custom_feed_posts')
   if (saved) {
     try {
-      return JSON.parse(saved)
+      const parsed = JSON.parse(saved)
+      return parsed.map(post => {
+        if (post.image_url && post.image_url.startsWith('blob:')) {
+          return {
+            ...post,
+            image_url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop',
+          }
+        }
+        return post
+      })
     } catch {
       return []
     }

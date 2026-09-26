@@ -434,9 +434,13 @@ export const PostCard = ({ post, onClickUser }) => {
           </div>
         ) : (
           <img
-            src={post.image_url}
-            alt={post.caption}
+            src={post.image_url || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop'}
+            alt={post.caption || 'post'}
             className="feed-post-image"
+            onError={e => {
+              e.target.onerror = null
+              e.target.src = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop'
+            }}
             onDoubleClick={handleLikeToggle}
           />
         )}
@@ -616,12 +620,12 @@ const Home = () => {
 
       if (response.ok) {
         const data = await response.json()
-        setStories(data.users_stories || [])
+        setStories(data.users_stories?.length > 0 ? data.users_stories : [])
       } else {
-        setStoriesError(true)
+        setStories([])
       }
     } catch {
-      setStoriesError(true)
+      setStories([])
     } finally {
       setStoriesLoading(false)
     }
@@ -674,8 +678,6 @@ const Home = () => {
               <div className="stories-loader-wrap">
                 <ThreeDots color="#0095f6" height={30} width={30} />
               </div>
-            ) : storiesError && stories.length === 0 ? (
-              <p className="stories-status-msg">Stories unavailable</p>
             ) : (
               <UserStories stories={stories} onClickStory={setActiveStory} />
             )}

@@ -50,8 +50,11 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     setIsVideo(isVid)
     setErrorMessage('')
 
-    const objectUrl = URL.createObjectURL(file)
-    setPreviewUrl(objectUrl)
+    const reader = new FileReader()
+    reader.onload = e => {
+      setPreviewUrl(e.target.result)
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleFileChange = e => {
