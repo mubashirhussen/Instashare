@@ -446,7 +446,15 @@ const ReelGridCard = ({ reel, onClickCard }) => {
         {/* Bottom Details Bar */}
         <div className="reel-bottom-bar">
           <div className="reel-author-row">
-            <img src={reel.profile_pic} alt={reel.user_name} className="reel-avatar" />
+            <img
+              src={reel.profile_pic || '/profile_avatar.jpg'}
+              alt={reel.user_name}
+              className="reel-avatar"
+              onError={e => {
+                e.target.onerror = null
+                e.target.src = '/profile_avatar.jpg'
+              }}
+            />
             <span className="reel-username">{reel.user_name}</span>
             {reel.is_verified && <BsPatchCheckFill className="reel-verified-badge" />}
           </div>
@@ -572,9 +580,13 @@ const Reels = () => {
               <div className="reel-modal-info-pane">
                 <div className="modal-creator-header">
                   <img
-                    src={selectedReelModal.profile_pic}
+                    src={selectedReelModal.profile_pic || '/profile_avatar.jpg'}
                     alt={selectedReelModal.user_name}
                     className="modal-creator-avatar"
+                    onError={e => {
+                      e.target.onerror = null
+                      e.target.src = '/profile_avatar.jpg'
+                    }}
                   />
                   <div>
                     <div className="modal-creator-name-row">

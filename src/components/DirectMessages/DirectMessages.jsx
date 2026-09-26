@@ -594,11 +594,19 @@ const DirectMessages = () => {
                               src={thread.avatar}
                               alt="Group member"
                               className="group-avatar-primary"
+                              onError={e => {
+                                e.target.onerror = null
+                                e.target.src = '/profile_avatar.jpg'
+                              }}
                             />
                             <img
                               src={thread.secondAvatar}
                               alt="Group member"
                               className="group-avatar-secondary"
+                              onError={e => {
+                                e.target.onerror = null
+                                e.target.src = '/profile_avatar.jpg'
+                              }}
                             />
                           </div>
                         ) : (
@@ -607,9 +615,13 @@ const DirectMessages = () => {
                               }`}
                           >
                             <img
-                              src={thread.avatar}
+                              src={thread.avatar || '/profile_avatar.jpg'}
                               alt={thread.name}
                               className="thread-avatar-img"
+                              onError={e => {
+                                e.target.onerror = null
+                                e.target.src = '/profile_avatar.jpg'
+                              }}
                             />
                           </div>
                         )}
@@ -659,9 +671,13 @@ const DirectMessages = () => {
                     </button>
                     <div className="chat-header-avatar-wrap">
                       <img
-                        src={activeThread.avatar}
+                        src={activeThread.avatar || '/profile_avatar.jpg'}
                         alt={activeThread.name}
                         className="chat-header-avatar"
+                        onError={e => {
+                          e.target.onerror = null
+                          e.target.src = '/profile_avatar.jpg'
+                        }}
                       />
                       {activeThread.onlineStatus.includes('now') && (
                         <span className="online-indicator-dot" />
@@ -713,9 +729,13 @@ const DirectMessages = () => {
                   {/* Recipient Profile Intro */}
                   <div className="chat-recipient-intro">
                     <img
-                      src={activeThread.avatar}
+                      src={activeThread.avatar || '/profile_avatar.jpg'}
                       alt={activeThread.name}
                       className="recipient-intro-avatar"
+                      onError={e => {
+                        e.target.onerror = null
+                        e.target.src = '/profile_avatar.jpg'
+                      }}
                     />
                     <h4 className="recipient-intro-name">{activeThread.name}</h4>
                     <p className="recipient-intro-handle">@{activeThread.username}</p>
@@ -747,9 +767,13 @@ const DirectMessages = () => {
                       >
                         {!isUser && (
                           <img
-                            src={activeThread.avatar}
+                            src={activeThread.avatar || '/profile_avatar.jpg'}
                             alt=""
                             className="message-sender-avatar"
+                            onError={e => {
+                              e.target.onerror = null
+                              e.target.src = '/profile_avatar.jpg'
+                            }}
                           />
                         )}
 

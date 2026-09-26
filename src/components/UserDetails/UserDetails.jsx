@@ -245,7 +245,15 @@ const UserDetails = () => {
             </div>
             <div className="avatar-ring-gradient">
               <div className="avatar-inner-border">
-                <img src={profilePic} alt="user profile" className="main-profile-img" />
+                <img
+                  src={profilePic || '/profile_avatar.jpg'}
+                  alt="user profile"
+                  className="main-profile-img"
+                  onError={e => {
+                    e.target.onerror = null
+                    e.target.src = '/profile_avatar.jpg'
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -341,9 +349,13 @@ const UserDetails = () => {
               >
                 <span className="profile-story-ring">
                   <img
-                    src={story.image || story.story_url}
+                    src={story.image || story.story_url || '/profile_avatar.jpg'}
                     alt={story.title || story.caption}
                     className="profile-story-image"
+                    onError={e => {
+                      e.target.onerror = null
+                      e.target.src = '/profile_avatar.jpg'
+                    }}
                   />
                 </span>
                 <span className="story-title-label">{story.title || story.caption || 'Highlight'}</span>
@@ -588,9 +600,13 @@ const UserDetails = () => {
                 ×
               </button>
               <img
-                src={activeStory.image || activeStory.story_url}
+                src={activeStory.image || activeStory.story_url || '/profile_avatar.jpg'}
                 alt={activeStory.caption || 'highlight'}
                 className="story-viewer-image"
+                onError={e => {
+                  e.target.onerror = null
+                  e.target.src = '/profile_avatar.jpg'
+                }}
               />
               <div className="story-info-bar">
                 <h4>{activeStory.title || activeStory.caption}</h4>

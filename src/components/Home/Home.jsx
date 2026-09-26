@@ -714,7 +714,14 @@ const Home = () => {
         <div className="home-story-backdrop" role="presentation" onClick={() => setActiveStory(null)}>
           <div className="home-story-viewer" role="dialog" aria-modal="true" aria-label={`${activeStory.user_name} story`} onClick={event => event.stopPropagation()}>
             <button type="button" className="home-story-close" onClick={() => setActiveStory(null)} aria-label="Close story">×</button>
-            <img src={activeStory.story_url} alt={`${activeStory.user_name} story`} />
+            <img
+              src={activeStory.story_url || '/profile_avatar.jpg'}
+              alt={`${activeStory.user_name} story`}
+              onError={e => {
+                e.target.onerror = null
+                e.target.src = '/profile_avatar.jpg'
+              }}
+            />
             <strong>{activeStory.user_name}</strong>
           </div>
         </div>

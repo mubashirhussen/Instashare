@@ -257,9 +257,13 @@ const Header = ({ searchInput, setSearchInput, onSearchClick, onCreatePost }) =>
                         onClick={() => handleSelectProfile(profile)}
                       >
                         <img
-                          src={profile.avatar}
+                          src={profile.avatar || '/profile_avatar.jpg'}
                           alt={profile.username}
                           className="search-profile-avatar"
+                          onError={e => {
+                            e.target.onerror = null
+                            e.target.src = '/profile_avatar.jpg'
+                          }}
                         />
                         <div className="search-profile-info">
                           <div className="search-name-row">
@@ -408,6 +412,10 @@ const Header = ({ searchInput, setSearchInput, onSearchClick, onCreatePost }) =>
                   src={userProfile?.profilePic || '/profile_avatar.jpg'}
                   alt="Profile"
                   className="nav-profile-avatar-img"
+                  onError={e => {
+                    e.target.onerror = null
+                    e.target.src = '/profile_avatar.jpg'
+                  }}
                 />
               </div>
               <span className="nav-label">Profile</span>

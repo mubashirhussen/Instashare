@@ -35,7 +35,7 @@ const DEFAULT_STORIES = [
   {
     user_id: 'user_codenloop',
     user_name: 'codenloop',
-    story_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop',
+    story_url: '/profile_avatar.jpg',
   },
   {
     user_id: 'user_flm',
@@ -145,7 +145,7 @@ const UserStories = ({ stories = [], onClickStory }) => {
                   className="story-avatar-img"
                   onError={e => {
                     e.target.onerror = null
-                    e.target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=300&auto=format&fit=crop'
+                    e.target.src = FALLBACK_AVATAR
                   }}
                 />
               </div>
