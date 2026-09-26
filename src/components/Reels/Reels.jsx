@@ -638,26 +638,6 @@ const Reels = () => {
     return () => window.removeEventListener('new_post_created', loadReels)
   }, [])
 
-  useEffect(() => {
-    if (selectedReelModal && modalVideoRef.current) {
-      modalVideoRef.current.currentTime = 0
-      const playPromise = modalVideoRef.current.play()
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setModalPlaying(true)
-          })
-          .catch(() => {
-            if (modalVideoRef.current) {
-              modalVideoRef.current.muted = true
-              setModalMuted(true)
-              modalVideoRef.current.play().then(() => setModalPlaying(true)).catch(() => {})
-            }
-          })
-      }
-    }
-  }, [selectedReelModal])
-
   const visibleReels = searchInput.trim()
     ? allReels.filter(reel =>
         `${reel.caption} ${reel.user_name} ${reel.topic || ''} ${reel.tag || ''}`
@@ -908,6 +888,18 @@ const Reels = () => {
                     <strong>{modalLikesCount.toLocaleString()} likes</strong>
                   </div>
                   <span className="reel-dark-date-label">August 15</span>
+
+                  {selectedReelModal.post_link && (
+                    <a
+                      href={selectedReelModal.post_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="reel-dark-ig-link"
+                    >
+                      <BsInstagram size={13} />
+                      <span>Watch Reel on Instagram ↗</span>
+                    </a>
+                  )}
 
                   {/* 4. Add a comment input form */}
                   <form className="reel-dark-add-comment-form" onSubmit={handleAddComment}>
