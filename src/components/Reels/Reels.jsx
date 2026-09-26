@@ -420,23 +420,10 @@ const LEARNING_REELS_LIST = [
 ]
 
 const ReelGridCard = ({ reel, onClickCard }) => {
-  const [isPlaying, setIsPlaying] = useState(true)
   const [isMuted, setIsMuted] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(reel.likes_count || 0)
   const videoRef = useRef(null)
-
-  const handleTogglePlay = e => {
-    e.stopPropagation()
-    if (!videoRef.current) return
-    if (videoRef.current.paused) {
-      videoRef.current.play()
-      setIsPlaying(true)
-    } else {
-      videoRef.current.pause()
-      setIsPlaying(false)
-    }
-  }
 
   const handleLike = e => {
     e.stopPropagation()
@@ -449,8 +436,23 @@ const ReelGridCard = ({ reel, onClickCard }) => {
     }
   }
 
+  const handleSoundToggle = e => {
+    e.stopPropagation()
+    setIsMuted(prev => !prev)
+  }
+
   return (
-    <div className="side-by-side-reel-card" onClick={() => onClickCard(reel)}>
+    <div
+      className="side-by-side-reel-card"
+      onClick={() => onClickCard(reel)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClickCard(reel)
+        }
+      }}
+    >
       <div className="reel-media-wrapper">
         <video
           ref={videoRef}
@@ -466,23 +468,11 @@ const ReelGridCard = ({ reel, onClickCard }) => {
         <button
           type="button"
           className="reel-sound-btn"
-          onClick={e => {
-            e.stopPropagation()
-            setIsMuted(prev => !prev)
-          }}
+          onClick={handleSoundToggle}
           aria-label={isMuted ? 'Unmute' : 'Mute'}
         >
           {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
         </button>
-
-        {/* Play/Pause overlay */}
-        <div className="reel-play-overlay" onClick={handleTogglePlay}>
-          {!isPlaying && (
-            <div className="reel-pause-indicator">
-              <BsPlayFill size={36} />
-            </div>
-          )}
-        </div>
 
         {/* Top Info Bar with Learning Tag */}
         <div className="reel-top-bar">
@@ -526,7 +516,7 @@ const ReelGridCard = ({ reel, onClickCard }) => {
               <span>{likesCount.toLocaleString()}</span>
             </button>
 
-            <button type="button" className="reel-action-btn">
+            <button type="button" className="reel-action-btn" onClick={e => { e.stopPropagation(); onClickCard(reel); }}>
               <BsChatFill size={14} />
               <span>{reel.comments_count || 0}</span>
             </button>
@@ -540,7 +530,27 @@ const ReelGridCard = ({ reel, onClickCard }) => {
 const Reels = () => {
   const [searchInput, setSearchInput] = useState('')
   const [selectedReelModal, setSelectedReelModal] = useState(null)
+  const [modalMuted, setModalMuted] = useState(false)
+  const [modalPlaying, setModalPlaying] = useState(true)
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
+  const modalVideoRef = useRef(null)
+
+  const toggleModalPlay = () => {
+    if (!modalVideoRef.current) return
+    if (modalVideoRef.current.paused) {
+      modalVideoRef.current.play()
+      setModalPlaying(true)
+    } else {
+      modalVideoRef.current.pause()
+      setModalPlaying(false)
+    }
+  }
+
+  const handleOpenReel = reel => {
+    setSelectedReelModal(reel)
+    setModalPlaying(true)
+    setModalMuted(false)
+  }
 
   const loadReels = () => {
     const custom = getCustomFeedPosts().filter(p => p.is_video && p.video_url)
@@ -557,6 +567,7 @@ const Reels = () => {
       views: '1',
       likes_count: c.likes_count || 0,
       comments_count: c.comments_count || 0,
+      post_link: c.post_link,
     }))
 
     setAllReels([...formattedCustom, ...LEARNING_REELS_LIST])
@@ -588,7 +599,7 @@ const Reels = () => {
               <ReelGridCard
                 key={reel.id}
                 reel={reel}
-                onClickCard={r => setSelectedReelModal(r)}
+                onClickCard={handleOpenReel}
               />
             ))
           ) : (
@@ -602,31 +613,60 @@ const Reels = () => {
         <div
           className="reel-modal-backdrop"
           onClick={() => setSelectedReelModal(null)}
+          role="presentation"
         >
           <div
             className="reel-modal-card"
             onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
           >
             <button
               type="button"
               className="reel-modal-close-btn"
               onClick={() => setSelectedReelModal(null)}
+              aria-label="Close modal"
             >
-              <BsX size={30} />
+              <BsX size={28} />
             </button>
 
             <div className="reel-modal-split-layout">
-              <div className="reel-modal-video-pane">
+              {/* Left Side: Seamless 9:16 Full Video Player */}
+              <div className="reel-modal-video-pane" onClick={toggleModalPlay}>
                 <video
+                  ref={modalVideoRef}
                   src={selectedReelModal.video_url}
-                  controls
                   autoPlay
                   playsInline
                   loop
+                  muted={modalMuted}
                   className="modal-playing-video"
                 />
+
+                {/* Sound Toggle */}
+                <button
+                  type="button"
+                  className="modal-video-sound-btn"
+                  onClick={e => {
+                    e.stopPropagation()
+                    setModalMuted(prev => !prev)
+                  }}
+                  aria-label={modalMuted ? 'Unmute' : 'Mute'}
+                >
+                  {modalMuted ? <FiVolumeX size={16} /> : <FiVolume2 size={16} />}
+                </button>
+
+                {/* Play/Pause Overlay Indicator */}
+                {!modalPlaying && (
+                  <div className="modal-video-pause-overlay">
+                    <div className="modal-pause-circle">
+                      <BsPlayFill size={44} />
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Right Side: Creator & Reel Information */}
               <div className="reel-modal-info-pane">
                 <div className="modal-creator-header">
                   <img
@@ -638,11 +678,11 @@ const Reels = () => {
                       e.target.src = '/profile_avatar.jpg'
                     }}
                   />
-                  <div>
+                  <div className="modal-creator-meta">
                     <div className="modal-creator-name-row">
-                      <strong>{selectedReelModal.user_name}</strong>
+                      <strong className="modal-creator-username">{selectedReelModal.user_name}</strong>
                       {selectedReelModal.is_verified && (
-                        <BsPatchCheckFill className="reel-verified-badge" />
+                        <BsPatchCheckFill className="reel-verified-badge" size={14} />
                       )}
                     </div>
                     <span className="modal-audio-info">
@@ -653,7 +693,7 @@ const Reels = () => {
 
                 <div className="modal-caption-area">
                   <span className="modal-topic-chip">{selectedReelModal.tag || '💻 Code'}</span>
-                  <p>{selectedReelModal.caption}</p>
+                  <p className="modal-caption-text">{selectedReelModal.caption}</p>
                 </div>
 
                 <div className="modal-reel-stats-bar">
