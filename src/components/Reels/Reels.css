@@ -346,6 +346,37 @@
   font-size: 14px;
 }
 
+.modal-reel-link-action {
+  margin-top: 14px;
+}
+
+.open-instagram-reel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
+}
+
+.open-instagram-reel-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.external-link-arrow {
+  font-size: 15px;
+}
+
 /* Responsive Grid Breakpoints */
 @media (max-width: 1280px) {
   .side-by-side-reels-grid-5 {

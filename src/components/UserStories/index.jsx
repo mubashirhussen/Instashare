@@ -33,11 +33,6 @@ const DEFAULT_STORIES = [
     story_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop',
   },
   {
-    user_id: 'user_codenloop',
-    user_name: 'codenloop',
-    story_url: '/codenloop_story.jpg',
-  },
-  {
     user_id: 'user_flm',
     user_name: 'flm_pronetwork',
     story_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop',
