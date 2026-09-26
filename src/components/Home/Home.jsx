@@ -49,7 +49,7 @@ export const ALL_FEED_POSTS = [
     post_id: 'ig_reel_ddyz7f',
     user_id: 'user_codenloop',
     user_name: 'codenloop',
-    profile_pic: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=200&auto=format&fit=crop',
+    profile_pic: '/codenloop_story.jpg',
     is_verified: true,
     time_ago: '2d',
     audio_info: 'codenloop • Trending Audio',

@@ -35,7 +35,7 @@ const DEFAULT_STORIES = [
   {
     user_id: 'user_codenloop',
     user_name: 'codenloop',
-    story_url: '/profile_avatar.jpg',
+    story_url: '/codenloop_story.jpg',
   },
   {
     user_id: 'user_flm',

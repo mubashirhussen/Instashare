@@ -62,7 +62,7 @@ const SEARCHABLE_PROFILES = [
   {
     username: 'codenloop',
     fullName: 'Code N Loop',
-    avatar: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=150',
+    avatar: '/codenloop_story.jpg',
     isVerified: true,
     category: 'DSA & Java Master',
     followers: '89.4K',
