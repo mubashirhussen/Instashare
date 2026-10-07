@@ -95,14 +95,39 @@ export const checkTextToxicityLocal = (text = '', context = 'comment') => {
 }
 
 /**
- * Moderate text in real-time (calls FastAPI backend if online, fallback to local transformer scoring)
+ * Moderate text in real-time (instant multilingual detection + FastAPI sync)
  */
 export const moderateText = async (text, context = 'post', author = 'current_user') => {
-  let result = null
+  // 🛡️ Instant High-Precision Zero-Leak Local Detection
+  const localResult = checkTextToxicityLocal(text, context)
 
+  let result = localResult
+
+  // If local check flagged toxic content, immediately return to guarantee it never reaches the feed
+  if (localResult.isToxic) {
+    saveModerationLog({
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      contentType: 'text',
+      context,
+      contentSample: text.length > 80 ? text.slice(0, 80) + '...' : text,
+      fullContent: text,
+      author,
+      status: localResult.status,
+      isToxic: localResult.isToxic,
+      toxicityScore: localResult.toxicityScore,
+      confidence: localResult.confidence,
+      categories: localResult.categories,
+      reason: localResult.reason,
+      multilingual: localResult.multilingual,
+      timestamp: new Date().toISOString(),
+    })
+    return localResult
+  }
+
+  // If clean locally, optional backend verification
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 1200)
+    const timeoutId = setTimeout(() => controller.abort(), 800)
 
     const response = await fetch(`${BACKEND_API_BASE}/predict/text`, {
       method: 'POST',
@@ -113,13 +138,13 @@ export const moderateText = async (text, context = 'post', author = 'current_use
     clearTimeout(timeoutId)
 
     if (response.ok) {
-      result = await response.json()
-    } else {
-      result = checkTextToxicityLocal(text, context)
+      const backendResult = await response.json()
+      if (backendResult.isToxic) {
+        result = backendResult
+      }
     }
   } catch {
-    // Graceful offline NLP evaluator
-    result = checkTextToxicityLocal(text, context)
+    // Keep clean local result
   }
 
   // Save audit log to storage
@@ -136,6 +161,7 @@ export const moderateText = async (text, context = 'post', author = 'current_use
     confidence: result.confidence,
     categories: result.categories,
     reason: result.reason,
+    multilingual: result.multilingual,
     timestamp: new Date().toISOString(),
   })
 

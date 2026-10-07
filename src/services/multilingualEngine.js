@@ -6,27 +6,28 @@ import datasetItems from '../data/multilingual_profanity.json'
 const normalizeText = text => {
   return text
     .toLowerCase()
-    .replace(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/g, ' ')
+    .replace(/[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-// Map common phonetic transliterations
+// Map common phonetic transliterations and dialect spelling variations
 const PHONETIC_SYNONYMS = {
-  puku: 'pooku',
-  pooku: 'puku',
-  lanja: 'lanjaa',
-  lanjaa: 'lanja',
-  chutiya: 'chootiya',
-  chootiya: 'chutiya',
-  behenchod: 'bhenchod',
-  bhenchod: 'behenchod',
-  madarchod: 'maderchod',
-  thevidiya: 'thevidiya',
-  soole: 'sulle',
-  sulle: 'soole',
-  gandu: 'gaandu',
-  gaandu: 'gandu',
+  puku: ['pooku', 'puku', 'pookuu', 'pukku'],
+  pooku: ['puku', 'pooku', 'pookuu', 'pukku'],
+  lanja: ['lanjaa', 'lanja', 'laanja', 'lanjakoduku'],
+  lanjaa: ['lanja', 'lanjaa', 'laanja'],
+  chutiya: ['chootiya', 'chutiya', 'chotya', 'chutiye'],
+  chootiya: ['chutiya', 'chootiya', 'chotya'],
+  behenchod: ['bhenchod', 'behenchod', 'bhenchodd', 'bc'],
+  bhenchod: ['behenchod', 'bhenchod', 'bc'],
+  madarchod: ['maderchod', 'madarchod', 'mc'],
+  thevidiya: ['dhevadiaa', 'thevidiya', 'devadiya', 'thevadiya'],
+  dhevadiaa: ['thevidiya', 'dhevadiaa', 'devadiya', 'thevadiya'],
+  soole: ['sulle', 'soole', 'sole', 'sooli'],
+  sulle: ['soole', 'sulle', 'sole', 'sooli'],
+  gandu: ['gaandu', 'gandu', 'gandoo'],
+  gaandu: ['gandu', 'gaandu', 'gandoo'],
 }
 
 // Sub-type localized translations for natural explanations
@@ -72,6 +73,13 @@ const SUBTYPE_TRANSLATIONS = {
     te: 'మరణాన్ని కోరుకునే తీవ్రమైన బెదిరింపు (Death-wish Profanity)',
     ta: 'மரண அச்சுறுத்தல் மற்றும் கடுமையான துன்புறுத்தல் (Death-wish)',
     kn: 'ಸಾವು ಬಯಸುವ ಗಂಭೀರ ಬೆದರಿಕೆ (Death-wish Profanity)',
+  },
+  'Hybrid Profanity': {
+    en: 'Severe Hybrid Profanity / Hate Slur',
+    hi: 'गंभीर हाइब्रिड असंसदीय गाली (Hybrid Profanity)',
+    te: 'తీవ్రమైన అసభ్యకరమైన పదజాలం (Hybrid Profanity)',
+    ta: 'கடுமையான அவதூறு வார்த்தை (Hybrid Profanity)',
+    kn: 'ಅತ್ಯಂತ ಗಂಭೀರ ಅಸಭ್ಯ ಪದ (Hybrid Profanity)',
   },
   'General Profanity': {
     en: 'Unparliamentary Profanity',
@@ -121,10 +129,15 @@ export const detectMultilingualProfanity = text => {
     }
   }
 
-  // 2. Full Romanized Phrase Match
+  // 2. Full Romanized Phrase Match (exact or substring)
   if (!bestMatch) {
     for (const item of indexedData) {
-      if (item.romanLower && (normalized.includes(item.romanLower) || lowerOriginal.includes(item.romanLower))) {
+      if (
+        item.romanLower &&
+        (normalized.includes(item.romanLower) ||
+          lowerOriginal.includes(item.romanLower) ||
+          item.romanLower.includes(normalized))
+      ) {
         bestMatch = item
         matchedWord = item.romanized
         matchScore = item.severity === 'Critical' ? 0.94 : 0.86
@@ -133,36 +146,55 @@ export const detectMultilingualProfanity = text => {
     }
   }
 
-  // 3. Token & Phonetic Matching (e.g. 'puku', 'lanja', 'chutiya', 'soole', etc.)
+  // 3. Multi-word phrase n-gram matching
+  if (!bestMatch) {
+    for (const item of indexedData) {
+      if (item.tokens.length >= 2) {
+        // If 2 or more tokens match in the sentence
+        const matchedTokens = item.tokens.filter(tok => normalized.includes(tok) || lowerOriginal.includes(tok))
+        if (matchedTokens.length >= 2 || (item.tokens.length === 2 && matchedTokens.length >= 1 && matchedTokens[0].length >= 5)) {
+          bestMatch = item
+          matchedWord = item.romanized
+          matchScore = item.severity === 'Critical' ? 0.94 : 0.86
+          break
+        }
+      }
+    }
+  }
+
+  // 4. Token & Phonetic Matching (e.g. 'puku', 'lanja', 'chutiya', 'soole', 'thevidiya', etc.)
   if (!bestMatch) {
     for (const word of words) {
       if (word.length < 3) continue
-      const phoneticVariant = PHONETIC_SYNONYMS[word] || ''
+      const synonyms = PHONETIC_SYNONYMS[word] || [word]
 
-      for (const item of indexedData) {
-        if (
-          item.tokens.includes(word) ||
-          (phoneticVariant && item.tokens.includes(phoneticVariant)) ||
-          (item.romanLower.length >= 4 && (word.includes(item.romanLower) || item.romanLower.includes(word)))
-        ) {
-          bestMatch = item
-          matchedWord = word
-          matchScore = item.severity === 'Critical' ? 0.92 : 0.84
-          break
+      for (const syn of synonyms) {
+        for (const item of indexedData) {
+          if (
+            item.tokens.includes(syn) ||
+            item.romanLower === syn ||
+            (item.romanLower.length >= 4 && (syn.includes(item.romanLower) || item.romanLower.includes(syn)))
+          ) {
+            bestMatch = item
+            matchedWord = word
+            matchScore = item.severity === 'Critical' ? 0.92 : 0.84
+            break
+          }
         }
+        if (bestMatch) break
       }
       if (bestMatch) break
     }
   }
 
-  // 4. Common high-priority multi-dialect fallback catches
+  // 5. Common high-frequency slurs fallback
   if (!bestMatch) {
     const HIGH_FREQUENCY_SLURS = [
-      { trigger: /\b(puku|pooku|lanja|lanjaa|munda|dengu|modda|guddalo|sulikoduku)\b/i, lang: 'Telugu', sub: 'Sexual Profanity', en: 'Severe vulgar Telugu anatomical/sexual profanity' },
-      { trigger: /\b(chutiya|madarchod|behenchod|bhenchod|gandu|bhadwe|harami|lauda|lodu)\b/i, lang: 'Hindi', sub: 'Maternal Profanity', en: 'Severe vulgar Hindi maternal/anatomical profanity' },
-      { trigger: /\b(thevidiya|othala|punda|sunni|baadu|mayire|koodhi)\b/i, lang: 'Tamil', sub: 'Sexual Profanity', en: 'Severe vulgar Tamil anatomical/slur profanity' },
-      { trigger: /\b(soole|sulle|bolimaga|tullu|gullu|halkat|hadar)\b/i, lang: 'Kannada', sub: 'Maternal Profanity', en: 'Severe vulgar Kannada insult/profanity' },
-      { trigger: /\b(fuck|bitch|bastard|asshole|whore|slut|cunt|motherfucker|dick)\b/i, lang: 'English', sub: 'General Profanity', en: 'Explicit vulgar English profanity' },
+      { trigger: /\b(puku|pooku|lanja|lanjaa|munda|dengu|modda|guddalo|sulikoduku|puttakundaa|undaalsindi|sannaasi|vedhava)\b/i, lang: 'Telugu', sub: 'Sexual Profanity', en: 'Severe vulgar Telugu unparliamentary profanity' },
+      { trigger: /\b(chutiya|chootiya|madarchod|behenchod|bhenchod|gandu|bhadwe|harami|lauda|lodu|randi|kameene)\b/i, lang: 'Hindi', sub: 'Maternal Profanity', en: 'Severe vulgar Hindi unparliamentary profanity' },
+      { trigger: /\b(thevidiya|dhevadiaa|othala|punda|sunni|baadu|mayire|koodhi|porambokku)\b/i, lang: 'Tamil', sub: 'Sexual Profanity', en: 'Severe vulgar Tamil unparliamentary profanity' },
+      { trigger: /\b(soole|sulle|bolimaga|tullu|gullu|halkat|hadar|loafer|thika)\b/i, lang: 'Kannada', sub: 'Maternal Profanity', en: 'Severe vulgar Kannada unparliamentary profanity' },
+      { trigger: /\b(fuck|bitch|bastard|asshole|whore|slut|cunt|motherfucker|dick|faggot|nigger|retard)\b/i, lang: 'English', sub: 'General Profanity', en: 'Explicit vulgar English profanity' },
     ]
 
     for (const hf of HIGH_FREQUENCY_SLURS) {
