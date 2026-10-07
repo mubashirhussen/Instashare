@@ -17,6 +17,8 @@ import {
 import { FaSearch } from 'react-icons/fa'
 import { IoSend } from 'react-icons/io5'
 import Header from '../Header'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
+import { moderateText } from '../../services/socialShieldAI'
 import './index.css'
 
 const initialThreads = [
@@ -399,10 +401,19 @@ const DirectMessages = () => {
     return `Thanks for the message! Really appreciate you reaching out about this 🙌 Let me know if you need anything else.`
   }
 
-  const handleSendMessage = e => {
+  const [shieldAlert, setShieldAlert] = useState(null)
+
+  const handleSendMessage = async e => {
     e?.preventDefault()
     const trimmedMessage = inputMessage.trim()
     if (!trimmedMessage) return
+
+    // 🛡️ SocialShield AI Real-Time Toxic Content Interception
+    const modResult = await moderateText(trimmedMessage, 'direct_message', 'mubashir_hussen.sk')
+    if (modResult.isToxic) {
+      setShieldAlert(modResult)
+      return
+    }
 
     const newMsg = {
       id: `msg_${Date.now()}`,
@@ -940,6 +951,14 @@ const DirectMessages = () => {
           </section>
         </div>
       </main>
+
+      {/* 🛡️ SocialShield AI Toxic Content Alert Modal */}
+      {shieldAlert && (
+        <SocialShieldAlert
+          blockResult={shieldAlert}
+          onClose={() => setShieldAlert(null)}
+        />
+      )}
     </div>
   )
 }

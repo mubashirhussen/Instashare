@@ -7,6 +7,7 @@ import {
   BsPlusSquare,
   BsPatchCheckFill,
   BsXCircleFill,
+  BsShieldShaded,
 } from 'react-icons/bs'
 import { AiOutlineHome, AiFillHome } from 'react-icons/ai'
 import { BiMoviePlay } from 'react-icons/bi'
@@ -399,7 +400,20 @@ const Header = ({ searchInput, setSearchInput, onSearchClick, onCreatePost }) =>
               <span className="nav-label">Create</span>
             </button>
 
-            {/* 6. Profile */}
+            {/* 6. SocialShield AI Dashboard */}
+            <Link
+              to="/socialshield-ai"
+              className={`nav-menu-item ${
+                currentPath === '/socialshield-ai' ? 'active-nav-item' : ''
+              }`}
+              title="SocialShield AI Moderation & Analytics Dashboard"
+              style={{ color: '#00f2fe' }}
+            >
+              <BsShieldShaded className="nav-icon" size={22} style={{ color: '#00f2fe' }} />
+              <span className="nav-label" style={{ fontWeight: 600 }}>Shield AI</span>
+            </Link>
+
+            {/* 7. Profile */}
             <Link
               to="/my-profile"
               className={`nav-menu-item ${

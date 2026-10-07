@@ -17,6 +17,8 @@ import { ThreeDots } from 'react-loader-spinner'
 import Header from '../Header'
 import UserStories from '../UserStories'
 import FailureView from '../FailureView'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
+import { moderateText } from '../../services/socialShieldAI'
 import { getCustomFeedPosts, getUserProfile } from '../../utils/storage'
 import './Home.css'
 
@@ -349,14 +351,24 @@ export const PostCard = ({ post, onClickUser }) => {
     }
   }
 
-  const handleAddComment = e => {
+  const [shieldAlert, setShieldAlert] = useState(null)
+
+  const handleAddComment = async e => {
     e.preventDefault()
-    if (!commentText.trim()) return
+    const trimmed = commentText.trim()
+    if (!trimmed) return
+
+    // 🛡️ SocialShield AI Real-Time Toxic Content Interception
+    const modResult = await moderateText(trimmed, 'comment', 'mubashir_hussen.sk')
+    if (modResult.isToxic) {
+      setShieldAlert(modResult)
+      return
+    }
 
     const currentUser = getUserProfile()
     const newCommentObj = {
       user_name: currentUser.username || 'mubashir_hussen.sk',
-      comment: commentText.trim(),
+      comment: trimmed,
     }
     setCommentsList(prev => [...prev, newCommentObj])
     setCommentText('')
@@ -583,6 +595,13 @@ export const PostCard = ({ post, onClickUser }) => {
           </form>
         )}
       </div>
+
+      {shieldAlert && (
+        <SocialShieldAlert
+          blockResult={shieldAlert}
+          onClose={() => setShieldAlert(null)}
+        />
+      )}
     </article>
   )
 }

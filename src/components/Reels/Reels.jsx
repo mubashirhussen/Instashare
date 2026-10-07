@@ -19,6 +19,8 @@ import {
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
 import Header from '../Header'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
+import { moderateText } from '../../services/socialShieldAI'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
 
@@ -545,6 +547,7 @@ const Reels = () => {
   const [modalFollowing, setModalFollowing] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [modalComments, setModalComments] = useState([])
+  const [shieldAlert, setShieldAlert] = useState(null)
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
   const modalVideoRef = useRef(null)
 
@@ -596,14 +599,23 @@ const Reels = () => {
     ])
   }
 
-  const handleAddComment = e => {
+  const handleAddComment = async e => {
     e.preventDefault()
-    if (!commentText.trim()) return
+    const trimmed = commentText.trim()
+    if (!trimmed) return
+
+    // 🛡️ SocialShield AI Real-Time Toxic Content Interception
+    const modResult = await moderateText(trimmed, 'reel_comment', 'mubashir_hussen.sk')
+    if (modResult.isToxic) {
+      setShieldAlert(modResult)
+      return
+    }
+
     const newC = {
       id: `c_${Date.now()}`,
       username: 'mubashir_hussen.sk',
       avatar: '/profile_avatar.jpg',
-      text: commentText.trim(),
+      text: trimmed,
       time: 'Just now',
       likes: 0,
     }
@@ -924,6 +936,13 @@ const Reels = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {shieldAlert && (
+        <SocialShieldAlert
+          blockResult={shieldAlert}
+          onClose={() => setShieldAlert(null)}
+        />
       )}
     </div>
   )

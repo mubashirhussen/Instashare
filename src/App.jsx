@@ -4,6 +4,7 @@ import Home from './components/Home/Home'
 import Reels from './components/Reels/Reels'
 import UserDetails from './components/UserDetails/UserDetails'
 import DirectMessages from './components/DirectMessages'
+import SocialShieldAdmin from './components/SocialShieldAdmin'
 import NotFound from './components/NotFound/Notfound'
 import ProtectedRouter from './components/ProtectedRouter/ProtectedRouter'
 import './App.css'
@@ -54,6 +55,14 @@ const App = () => {
         element={
           <ProtectedRouter>
             <DirectMessages />
+          </ProtectedRouter>
+        }
+      />
+      <Route
+        path="/socialshield-ai"
+        element={
+          <ProtectedRouter>
+            <SocialShieldAdmin />
           </ProtectedRouter>
         }
       />

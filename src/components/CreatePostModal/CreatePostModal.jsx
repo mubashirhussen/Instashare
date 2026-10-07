@@ -9,6 +9,8 @@ import {
   BsArrowLeft,
 } from 'react-icons/bs'
 import { addNewPost } from '../../utils/storage'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
+import { moderateText, moderateMedia } from '../../services/socialShieldAI'
 import './CreatePostModal.css'
 
 const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
@@ -20,6 +22,8 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
   const [isSuccess, setIsSuccess] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isModerating, setIsModerating] = useState(false)
+  const [shieldAlert, setShieldAlert] = useState(null)
 
   const fileInputRef = useRef(null)
 
@@ -89,11 +93,44 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
     }
   }
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault()
     if (!previewUrl) {
       setErrorMessage('Please select an image or video file to upload.')
       return
+    }
+
+    setIsModerating(true)
+    setErrorMessage('')
+
+    try {
+      // 🛡️ 1. SocialShield AI: Moderate Caption
+      if (caption.trim()) {
+        const textResult = await moderateText(caption.trim(), 'caption', 'mubashir_hussen.sk')
+        if (textResult.isToxic) {
+          setIsModerating(false)
+          setShieldAlert(textResult)
+          return
+        }
+      }
+
+      // 🛡️ 2. SocialShield AI: Moderate Image / Video Media
+      if (selectedFile) {
+        const mediaResult = await moderateMedia(
+          selectedFile,
+          isVideo ? 'video' : 'image',
+          'mubashir_hussen.sk'
+        )
+        if (mediaResult.isToxic) {
+          setIsModerating(false)
+          setShieldAlert(mediaResult)
+          return
+        }
+      }
+    } catch {
+      // Continue safely if evaluation error
+    } finally {
+      setIsModerating(false)
     }
 
     const newPost = {
@@ -286,8 +323,12 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
                     Select another file
                   </button>
 
-                  <button type="submit" className="publish-submit-btn">
-                    Share to Profile & Feed
+                  <button
+                    type="submit"
+                    className="publish-submit-btn"
+                    disabled={isModerating}
+                  >
+                    {isModerating ? '🛡️ Scanning Safety...' : 'Share to Profile & Feed'}
                   </button>
                 </div>
               </div>
@@ -295,6 +336,13 @@ const CreatePostModal = ({ isOpen, onClose, onPostCreated }) => {
           </form>
         )}
       </div>
+
+      {shieldAlert && (
+        <SocialShieldAlert
+          blockResult={shieldAlert}
+          onClose={() => setShieldAlert(null)}
+        />
+      )}
     </div>
   )
 }
