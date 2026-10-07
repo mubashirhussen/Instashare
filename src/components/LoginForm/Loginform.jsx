@@ -9,7 +9,9 @@ const LoginForm = () => {
   const [isSignUp, setIsSignUp] = useState(false)
   const [username, setUsername] = useState('')
   const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [showSubmitError, setShowSubmitError] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -48,7 +50,7 @@ const LoginForm = () => {
         ...existingProfile,
         username: localUser.username,
         name: localUser.fullName || localUser.username,
-        profilePic: '/profile_avatar.jpg',
+        profilePic: localUser.avatarUrl || '/profile_avatar.jpg',
       }
       onSubmitSuccess('mock_jwt_token_' + Date.now(), dynamicProfile)
       return
@@ -90,8 +92,9 @@ const LoginForm = () => {
       const newUser = registerUser({
         username: username.trim(),
         fullName: fullName.trim(),
+        email: email.trim(),
         password,
-        avatarUrl: '/profile_avatar.jpg',
+        avatarUrl: avatarUrl.trim() || '/profile_avatar.jpg',
       })
 
       setSuccessMsg(`Welcome, ${newUser.fullName}! Account created successfully.`)
@@ -100,7 +103,7 @@ const LoginForm = () => {
           ...getUserProfile(),
           username: newUser.username,
           name: newUser.fullName,
-          profilePic: '/profile_avatar.jpg',
+          profilePic: newUser.avatarUrl || '/profile_avatar.jpg',
         })
       }, 1000)
     } catch (err) {
@@ -148,20 +151,36 @@ const LoginForm = () => {
 
           <form className="login-form" onSubmit={isSignUp ? handleRegister : handleLogin}>
             {isSignUp && (
-              <div className="input-container">
-                <label className="input-label" htmlFor="fullName">
-                  FULL NAME
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  className="login-input"
-                  value={fullName}
-                  onChange={e => setFullName(e.target.value)}
-                  placeholder="e.g. Mubashir Hussen"
-                  required
-                />
-              </div>
+              <>
+                <div className="input-container">
+                  <label className="input-label" htmlFor="fullName">
+                    FULL NAME
+                  </label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    className="login-input"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    placeholder="Mubashir Hussen"
+                    required
+                  />
+                </div>
+
+                <div className="input-container">
+                  <label className="input-label" htmlFor="email">
+                    EMAIL ADDRESS (OPTIONAL)
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="login-input"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="alex@example.com"
+                  />
+                </div>
+              </>
             )}
 
             <div className="input-container">
@@ -174,7 +193,7 @@ const LoginForm = () => {
                 className="login-input"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder={isSignUp ? 'Choose a unique username' : 'Username (e.g. rahul)'}
+                placeholder={isSignUp ? 'mubashir_hussen.sk' : 'Username (e.g. rahul)'}
                 required
               />
             </div>
@@ -189,10 +208,26 @@ const LoginForm = () => {
                 className="login-input"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder={isSignUp ? 'At least 6 characters' : 'Password (e.g. rahul@2021)'}
+                placeholder="•••••••••"
                 required
               />
             </div>
+
+            {isSignUp && (
+              <div className="input-container">
+                <label className="input-label" htmlFor="avatarUrl">
+                  AVATAR IMAGE URL (OPTIONAL)
+                </label>
+                <input
+                  type="text"
+                  id="avatarUrl"
+                  className="login-input"
+                  value={avatarUrl}
+                  onChange={e => setAvatarUrl(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                />
+              </div>
+            )}
 
             {showSubmitError && <p className="error-message">{errorMsg}</p>}
             {successMsg && <p className="success-message">{successMsg}</p>}

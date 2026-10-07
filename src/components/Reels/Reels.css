@@ -580,20 +580,29 @@
 }
 
 .reel-dark-ig-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0095f6;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff !important;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
   text-decoration: none;
-  margin-top: 2px;
-  transition: opacity 0.15s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 14px rgba(220, 39, 67, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-sizing: border-box;
 }
 
 .reel-dark-ig-link:hover {
-  opacity: 0.8;
-  text-decoration: underline;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(220, 39, 67, 0.5);
+  opacity: 0.95;
+  text-decoration: none;
 }
 
 /* 4. Add a comment input form */
