@@ -6,6 +6,8 @@
 const STORAGE_KEY_LOGS = 'socialshield_moderation_logs'
 const BACKEND_API_BASE = 'http://localhost:8000'
 
+import { detectMultilingualProfanity } from './multilingualEngine'
+
 // Comprehensive Lexicons & NLP Patterns aligned with Jigsaw Toxic / HateXplain datasets
 const TOXIC_PATTERNS = [
   // Abusive & Profanity terms
@@ -30,6 +32,26 @@ export const checkTextToxicityLocal = (text = '', context = 'comment') => {
       categories: [],
       reason: 'Content is clean and empty.',
       status: 'SAFE',
+      originalText: '',
+      context,
+      timestamp: new Date().toISOString(),
+    }
+  }
+
+  // 🛡️ Step 1: Check Multilingual Profanity Dataset (Telugu, Hindi, Tamil, Kannada, English)
+  const multiResult = detectMultilingualProfanity(text)
+  if (multiResult) {
+    return {
+      isToxic: true,
+      toxicityScore: Number((multiResult.score / 100).toFixed(2)),
+      confidence: multiResult.confidence,
+      categories: ['Violated Parliamentary Standards', multiResult.subType],
+      reason: multiResult.violationTitle,
+      status: 'BLOCKED',
+      originalText: text,
+      context,
+      multilingual: multiResult,
+      timestamp: new Date().toISOString(),
     }
   }
 
@@ -66,6 +88,7 @@ export const checkTextToxicityLocal = (text = '', context = 'comment') => {
     categories: detectedCategories,
     reason,
     status: isToxic ? 'BLOCKED' : 'ALLOWED',
+    originalText: text,
     context,
     timestamp: new Date().toISOString(),
   }

@@ -1,224 +1,312 @@
-.socialshield-alert-backdrop {
+/* ==========================================================================
+   SocialShield AI Pre-Post Prevention Shield Alert Modal
+   Exact Glassmorphism Dark UI matching Parliamentary Standards Shield
+   ========================================================================== */
+
+.shield-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: rgba(10, 12, 16, 0.82);
-  backdrop-filter: blur(12px);
+  z-index: 99999;
+  background: rgba(4, 7, 15, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  animation: shieldFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.socialshield-alert-card {
+@keyframes shieldFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.shield-modal-card {
   position: relative;
-  width: min(480px, 94vw);
-  background: #181a20;
-  border: 1px solid rgba(255, 68, 68, 0.35);
-  border-radius: 18px;
-  padding: 32px 28px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 68, 68, 0.15);
-  color: #f5f5f7;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0d121f;
+  border: 1px solid rgba(255, 45, 85, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(255, 0, 85, 0.15);
+  padding: 24px 26px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  gap: 16px;
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
-.animate-shield-pop {
-  animation: shieldPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+.shield-modal-card::-webkit-scrollbar {
+  width: 5px;
+}
+.shield-modal-card::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
 
-@keyframes shieldPop {
-  0% {
-    opacity: 0;
-    transform: scale(0.92) translateY(14px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.socialshield-close-btn {
+/* Close Button */
+.shield-modal-close-icon {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  color: #a0a0a0;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
-.socialshield-close-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+.shield-modal-close-icon:hover {
+  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
+  transform: rotate(90deg);
 }
 
-.socialshield-badge-icon-wrap {
-  position: relative;
-  margin-bottom: 18px;
-}
-
-.shield-pulsing-glow {
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 59, 48, 0.4) 0%, transparent 70%);
-  animation: pulseGlow 2s infinite ease-in-out;
-}
-
-@keyframes pulseGlow {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.15); opacity: 1; }
-}
-
-.shield-main-icon {
-  color: #ff3b30;
-  position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 6px 14px rgba(255, 59, 48, 0.45));
-}
-
-.shield-warning-mini {
-  position: absolute;
-  bottom: -2px;
-  right: -6px;
-  color: #ffcc00;
-  z-index: 3;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
-}
-
-.shield-tag-pill {
-  display: inline-block;
-  background: rgba(255, 59, 48, 0.15);
-  color: #ff453a;
-  border: 1px solid rgba(255, 59, 48, 0.3);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.8px;
-  margin-bottom: 10px;
-}
-
-.shield-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 8px;
-}
-
-.shield-subtitle {
-  font-size: 13px;
-  color: #a0a0a0;
-  line-height: 1.45;
-  margin: 0 0 20px;
-}
-
-.shield-details-box {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 22px;
+/* 1. Header Activation Banner */
+.shield-top-banner {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  text-align: left;
-}
-
-.shield-detail-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-.detail-label {
-  color: #8e8e93;
-  font-weight: 500;
-}
-
-.status-blocked-pill {
-  background: #ff3b30;
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 6px;
-  letter-spacing: 0.5px;
-}
-
-.confidence-value {
-  font-weight: 700;
-  color: #30d158;
-}
-
-.category-tags-wrap {
-  display: flex;
-  flex-wrap: wrap;
   gap: 6px;
 }
 
-.category-tag-badge {
-  background: rgba(255, 69, 58, 0.2);
-  color: #ff6961;
-  border: 1px solid rgba(255, 69, 58, 0.35);
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
+.shield-activation-pill {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #ff3366;
+  text-transform: uppercase;
 }
 
-.shield-reason-box {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 10px;
+.shield-main-heading {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
-.reason-heading {
+/* 2. Violation Banner Card */
+.shield-violation-card {
+  background: #1e0a13;
+  border: 1px solid #5a1428;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.shield-violation-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #ffa3b4;
+}
+
+.shield-violation-text strong {
+  color: #ff3b69;
+  font-weight: 700;
+}
+
+/* 3. Original Blocked Input */
+.shield-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shield-section-label {
   font-size: 11px;
   font-weight: 700;
-  color: #8e8e93;
+  letter-spacing: 0.8px;
+  color: #8b9bb4;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
 }
 
-.reason-text {
-  font-size: 12.5px;
-  color: #f2f2f7;
-  margin: 4px 0 0;
+.shield-code-block {
+  background: #060913;
+  border: 1px solid #1c2638;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.shield-code-block code {
+  font-family: 'Consolas', 'Courier New', Courier, monospace;
+  font-size: 13.5px;
+  color: #ff6b81;
+  word-break: break-word;
+}
+
+/* 4. Multilingual Section */
+.shield-multilingual-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shield-multilingual-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shield-sparkle-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #818cf8;
+}
+
+.sparkle-icon {
+  color: #a5b4fc;
+}
+
+.shield-source-tag {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Translations Grid */
+.shield-translations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.shield-translation-card {
+  background: #111728;
+  border: 1px solid #1d273d;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.shield-translation-card:hover {
+  border-color: rgba(0, 242, 254, 0.4);
+}
+
+.shield-card-full-width {
+  grid-column: span 2;
+}
+
+.translation-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 4px;
+  margin-bottom: 2px;
+}
+
+.card-lang-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.card-native-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00f2fe;
+}
+
+.translation-statement {
+  margin: 0;
+  font-size: 12px;
   line-height: 1.4;
+  color: #e2e8f0;
+  word-break: break-word;
 }
 
-.shield-footer-actions {
-  width: 100%;
+.translation-explanation {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #94a3b8;
 }
 
-.shield-understand-btn {
+/* 5. Safety Score Bar */
+.shield-score-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 4px 0 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.score-label {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.score-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ff2d55;
+  letter-spacing: 0.5px;
+}
+
+/* 6. Action Button */
+.shield-confirm-action-btn {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #ff3b30 0%, #c92a2a 100%);
+  background: linear-gradient(135deg, #ff0055 0%, #e6004c 100%);
   color: #ffffff;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 700;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 14px rgba(255, 59, 48, 0.35);
+  text-transform: uppercase;
+  box-shadow: 0 6px 20px rgba(255, 0, 85, 0.4);
+  transition: all 0.2s ease;
 }
 
-.shield-understand-btn:hover {
+.shield-confirm-action-btn:hover {
+  background: linear-gradient(135deg, #ff1a6b 0%, #ff0055 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(255, 59, 48, 0.5);
-  opacity: 0.95;
+  box-shadow: 0 8px 25px rgba(255, 0, 85, 0.55);
+}
+
+.shield-confirm-action-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustment */
+@media (max-width: 600px) {
+  .shield-modal-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  .shield-main-heading {
+    font-size: 19px;
+  }
+  .shield-translations-grid {
+    grid-template-columns: 1fr;
+  }
+  .shield-card-full-width {
+    grid-column: span 1;
+  }
 }

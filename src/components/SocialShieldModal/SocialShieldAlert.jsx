@@ -1,73 +1,191 @@
 import React from 'react'
-import { BsShieldShaded, BsExclamationTriangleFill, BsX } from 'react-icons/bs'
+import { BsStars, BsX } from 'react-icons/bs'
 import './index.css'
 
 const SocialShieldAlert = ({ blockResult, onClose }) => {
   if (!blockResult || !blockResult.isToxic) return null
 
-  const { categories = [], confidence, reason, toxicityScore } = blockResult
+  const {
+    categories = [],
+    confidence = '92.0%',
+    reason,
+    originalText = '',
+    context = 'comment',
+    multilingual,
+  } = blockResult
+
+  // Determine dynamic title
+  let contextTitle = 'Social Comment Blocked from Publishing'
+  if (context === 'direct_message' || context === 'chat') {
+    contextTitle = 'Direct Message Blocked from Sending'
+  } else if (context === 'post' || context === 'post_caption' || context === 'image_upload' || context === 'video_upload') {
+    contextTitle = 'Social Post Blocked from Publishing'
+  } else if (context === 'reel_comment') {
+    contextTitle = 'Reel Comment Blocked from Publishing'
+  }
+
+  const violationText =
+    reason ||
+    'Violated Parliamentary Standards: Detected Multilingual profanity / unparliamentary language'
+
+  const translations = multilingual?.translations || {
+    english: {
+      langName: 'English',
+      nativeLangLabel: 'English',
+      statement: `Flagged toxic statement: '${originalText}'`,
+      explanation: 'Flagged toxic statement violating community guidelines and unparliamentary speech standards.',
+    },
+    hindi: {
+      langName: 'Hindi',
+      nativeLangLabel: 'हिन्दी',
+      statement: `ध्वजांकित हानिकारक कथन: '${originalText}'`,
+      explanation: 'सामुदायिक दिशानिर्देशों और असंसदीय भाषा मानकों का उल्लंघन करने वाला ध्वजांकित कथन।',
+    },
+    telugu: {
+      langName: 'Telugu',
+      nativeLangLabel: 'తెలుగు',
+      statement: `హానికరమైనదిగా గుర్తించబడిన వాక్యం: '${originalText}'`,
+      explanation: 'కమ్యూనిటీ మార్గదర్శకాలు మరియు అసభా నిబంధనలను ఉల్లంఘించే ప్రమాదకరమైన వాక్యం.',
+    },
+    tamil: {
+      langName: 'Tamil',
+      nativeLangLabel: 'தமிழ்',
+      statement: `தீங்கு விளைவிக்கும் செய்தியாகக் குறிக்கப்பட்டது: '${originalText}'`,
+      explanation: 'சமூக வழிகாட்டுதல்களை மீறும் தகாத மற்றும் தீங்கு விளைவிக்கும் வாசகம்.',
+    },
+    kannada: {
+      langName: 'Kannada',
+      nativeLangLabel: 'ಕನ್ನಡ',
+      statement: `ಹಾನಿಕಾರಕವೆಂದು ಗುರುತಿಸಲಾದ ಸಂದೇಶ: '${originalText}'`,
+      explanation: 'ಸಮುದಾಯ ಮಾರ್ಗಸೂಚಿಗಳನ್ನು ಉಲ್ಲಂಘಿಸುವ ಅಸಭ್ಯ ಹಾಗೂ ಹಾನಿಕಾರಕ ಹೇಳಿಕೆ.',
+    },
+  }
+
+  const sourceLang = multilingual?.sourceLanguage || 'English'
 
   return (
-    <div className="socialshield-alert-backdrop" role="alertdialog" aria-modal="true">
-      <div className="socialshield-alert-card animate-shield-pop">
+    <div className="shield-modal-backdrop" role="alertdialog" aria-modal="true">
+      <div className="shield-modal-card">
+        {/* Top Dismiss Cross */}
         <button
           type="button"
-          className="socialshield-close-btn"
+          className="shield-modal-close-icon"
           onClick={onClose}
           aria-label="Dismiss alert"
         >
-          <BsX size={26} />
+          <BsX size={24} />
         </button>
 
-        <div className="socialshield-badge-icon-wrap">
-          <div className="shield-pulsing-glow" />
-          <BsShieldShaded className="shield-main-icon" size={48} />
-          <BsExclamationTriangleFill className="shield-warning-mini" size={20} />
+        {/* 1. Header Activation Banner */}
+        <div className="shield-top-banner">
+          <span className="shield-activation-pill">
+            PRE-POST PREVENTION SHIELD ACTIVATED
+          </span>
+          <h2 className="shield-main-heading">{contextTitle}</h2>
         </div>
 
-        <div className="socialshield-header-text">
-          <span className="shield-tag-pill">AI CONTENT MODERATION ENGINE</span>
-          <h2 className="shield-title">Harmful Content Blocked</h2>
-          <p className="shield-subtitle">
-            SocialShield AI intercepted and prevented this content from being published to protect our community.
+        {/* 2. Violation Banner Card */}
+        <div className="shield-violation-card">
+          <p className="shield-violation-text">
+            <strong>Violation:</strong> {violationText}
           </p>
         </div>
 
-        <div className="shield-details-box">
-          <div className="shield-detail-row">
-            <span className="detail-label">Status</span>
-            <span className="status-blocked-pill">BLOCKED BY AI</span>
+        {/* 3. Original Blocked Input Code Block */}
+        <div className="shield-input-section">
+          <span className="shield-section-label">ORIGINAL BLOCKED INPUT:</span>
+          <div className="shield-code-block">
+            <code>"{originalText || 'Content blocked prior to dispatch'}"</code>
           </div>
+        </div>
 
-          <div className="shield-detail-row">
-            <span className="detail-label">Confidence Score</span>
-            <span className="detail-value confidence-value">{confidence || `${((toxicityScore || 0.95) * 100).toFixed(1)}%`}</span>
-          </div>
-
-          {categories.length > 0 && (
-            <div className="shield-detail-row">
-              <span className="detail-label">Violations Detected</span>
-              <div className="category-tags-wrap">
-                {categories.map((cat, idx) => (
-                  <span key={idx} className="category-tag-badge">
-                    {cat}
-                  </span>
-                ))}
-              </div>
+        {/* 4. Multilingual Translations & Explanations */}
+        <div className="shield-multilingual-section">
+          <div className="shield-multilingual-header">
+            <div className="shield-sparkle-title">
+              <BsStars className="sparkle-icon" size={16} />
+              <span>Multilingual Translations &amp; Explanations</span>
             </div>
-          )}
+            <span className="shield-source-tag">Source: {sourceLang}</span>
+          </div>
 
-          <div className="shield-reason-box">
-            <span className="reason-heading">Moderation Decision:</span>
-            <p className="reason-text">{reason || 'Violated platform anti-harassment and safety guidelines.'}</p>
+          <div className="shield-translations-grid">
+            {/* English */}
+            <div className="shield-translation-card">
+              <div className="translation-card-top">
+                <span className="card-lang-name">{translations.english.langName}</span>
+                <span className="card-native-label">{translations.english.nativeLangLabel}</span>
+              </div>
+              <p className="translation-statement">{translations.english.statement}</p>
+              {translations.english.explanation && (
+                <p className="translation-explanation">{translations.english.explanation}</p>
+              )}
+            </div>
+
+            {/* Hindi */}
+            <div className="shield-translation-card">
+              <div className="translation-card-top">
+                <span className="card-lang-name">{translations.hindi.langName}</span>
+                <span className="card-native-label">{translations.hindi.nativeLangLabel}</span>
+              </div>
+              <p className="translation-statement">{translations.hindi.statement}</p>
+              {translations.hindi.explanation && (
+                <p className="translation-explanation">{translations.hindi.explanation}</p>
+              )}
+            </div>
+
+            {/* Telugu */}
+            <div className="shield-translation-card">
+              <div className="translation-card-top">
+                <span className="card-lang-name">{translations.telugu.langName}</span>
+                <span className="card-native-label">{translations.telugu.nativeLangLabel}</span>
+              </div>
+              <p className="translation-statement">{translations.telugu.statement}</p>
+              {translations.telugu.explanation && (
+                <p className="translation-explanation">{translations.telugu.explanation}</p>
+              )}
+            </div>
+
+            {/* Tamil */}
+            <div className="shield-translation-card">
+              <div className="translation-card-top">
+                <span className="card-lang-name">{translations.tamil.langName}</span>
+                <span className="card-native-label">{translations.tamil.nativeLangLabel}</span>
+              </div>
+              <p className="translation-statement">{translations.tamil.statement}</p>
+              {translations.tamil.explanation && (
+                <p className="translation-explanation">{translations.tamil.explanation}</p>
+              )}
+            </div>
+
+            {/* Kannada */}
+            <div className="shield-translation-card shield-card-full-width">
+              <div className="translation-card-top">
+                <span className="card-lang-name">{translations.kannada.langName}</span>
+                <span className="card-native-label">{translations.kannada.nativeLangLabel}</span>
+              </div>
+              <p className="translation-statement">{translations.kannada.statement}</p>
+              {translations.kannada.explanation && (
+                <p className="translation-explanation">{translations.kannada.explanation}</p>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="shield-footer-actions">
-          <button type="button" className="shield-understand-btn" onClick={onClose}>
-            I Understand
-          </button>
+        {/* 5. Safety Violation Score Bar */}
+        <div className="shield-score-bar">
+          <span className="score-label">Safety Violation Score:</span>
+          <span className="score-value">{confidence}</span>
         </div>
+
+        {/* 6. Action Button */}
+        <button
+          type="button"
+          className="shield-confirm-action-btn"
+          onClick={onClose}
+        >
+          I UNDERSTAND (CONTENT WITHHELD)
+        </button>
       </div>
     </div>
   )
