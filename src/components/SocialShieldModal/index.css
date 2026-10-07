@@ -198,52 +198,56 @@
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transition: border-color 0.2s ease;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .shield-translation-card:hover {
   border-color: rgba(0, 242, 254, 0.4);
-}
-
-.shield-card-full-width {
-  grid-column: span 2;
+  background: #141c30;
 }
 
 .translation-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 4px;
-  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 6px;
 }
 
 .card-lang-name {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 .card-native-label {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #00f2fe;
 }
 
-.translation-statement {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.4;
-  color: #e2e8f0;
-  word-break: break-word;
+.card-meaning-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.translation-explanation {
-  margin: 0;
+.meaning-field-label {
   font-size: 11px;
-  line-height: 1.4;
-  color: #94a3b8;
+  font-weight: 600;
+  color: #818cf8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.translation-exact-meaning {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #ffffff;
+  word-break: break-word;
 }
 
 /* 5. Safety Score Bar */

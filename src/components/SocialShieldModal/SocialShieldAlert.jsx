@@ -1,5 +1,5 @@
 import React from 'react'
-import { BsStars, BsX } from 'react-icons/bs'
+import { BsStars, BsX, BsTranslate } from 'react-icons/bs'
 import './index.css'
 
 const SocialShieldAlert = ({ blockResult, onClose }) => {
@@ -28,40 +28,57 @@ const SocialShieldAlert = ({ blockResult, onClose }) => {
     reason ||
     'Violated Parliamentary Standards: Detected Multilingual profanity / unparliamentary language'
 
+  const matchedWord = multilingual?.matchedWord || originalText
+
   const translations = multilingual?.translations || {
     english: {
       langName: 'English',
       nativeLangLabel: 'English',
-      statement: `Flagged toxic statement: '${originalText}'`,
-      explanation: 'Flagged toxic statement violating community guidelines and unparliamentary speech standards.',
+      word: matchedWord,
+      meaning: 'Son of a whore / abusive profanity',
     },
     hindi: {
       langName: 'Hindi',
       nativeLangLabel: 'हिन्दी',
-      statement: `ध्वजांकित हानिकारक कथन: '${originalText}'`,
-      explanation: 'सामुदायिक दिशानिर्देशों और असंसदीय भाषा मानकों का उल्लंघन करने वाला ध्वजांकित कथन।',
+      word: matchedWord,
+      meaning: 'वेश्या की संतान / अत्यंत अश्लील गाली (Veshya ki santaan)',
     },
     telugu: {
       langName: 'Telugu',
       nativeLangLabel: 'తెలుగు',
-      statement: `హానికరమైనదిగా గుర్తించబడిన వాక్యం: '${originalText}'`,
-      explanation: 'కమ్యూనిటీ మార్గదర్శకాలు మరియు అసభా నిబంధనలను ఉల్లంఘించే ప్రమాదకరమైన వాక్యం.',
+      word: matchedWord,
+      meaning: 'వేశ్య యొక్క కుమారుడు / తీవ్రమైన అసభ్యకరమైన తిట్టు',
     },
     tamil: {
       langName: 'Tamil',
       nativeLangLabel: 'தமிழ்',
-      statement: `தீங்கு விளைவிக்கும் செய்தியாகக் குறிக்கப்பட்டது: '${originalText}'`,
-      explanation: 'சமூக வழிகாட்டுதல்களை மீறும் தகாத மற்றும் தீங்கு விளைவிக்கும் வாசகம்.',
+      word: matchedWord,
+      meaning: 'வேசியின் மகன் (Vaesiyin magan)',
     },
     kannada: {
       langName: 'Kannada',
       nativeLangLabel: 'ಕನ್ನಡ',
-      statement: `ಹಾನಿಕಾರಕವೆಂದು ಗುರುತಿಸಲಾದ ಸಂದೇಶ: '${originalText}'`,
-      explanation: 'ಸಮುದಾಯ ಮಾರ್ಗಸೂಚಿಗಳನ್ನು ಉಲ್ಲಂಘಿಸುವ ಅಸಭ್ಯ ಹಾಗೂ ಹಾನಿಕಾರಕ ಹೇಳಿಕೆ.',
+      word: matchedWord,
+      meaning: 'ವೇಶ್ಯೆಯ ಮಗ (Vēśyeya maga)',
+    },
+    malayalam: {
+      langName: 'Malayalam',
+      nativeLangLabel: 'മലയാളം',
+      word: matchedWord,
+      meaning: 'വ്യഭിചാരിയുടെ മകൻ (Vyabhichaariyude makan)',
     },
   }
 
-  const sourceLang = multilingual?.sourceLanguage || 'English'
+  const sourceLang = multilingual?.sourceLanguage || 'Telugu'
+
+  const langList = [
+    { key: 'english', labelPrefix: 'Meaning:' },
+    { key: 'hindi', labelPrefix: 'अर्थ (Meaning):' },
+    { key: 'telugu', labelPrefix: 'అర్థం (Meaning):' },
+    { key: 'tamil', labelPrefix: 'பொருள் (Meaning):' },
+    { key: 'kannada', labelPrefix: 'ಅರ್ಥ (Meaning):' },
+    { key: 'malayalam', labelPrefix: 'അർത്ഥം (Meaning):' },
+  ]
 
   return (
     <div className="shield-modal-backdrop" role="alertdialog" aria-modal="true">
@@ -99,76 +116,33 @@ const SocialShieldAlert = ({ blockResult, onClose }) => {
           </div>
         </div>
 
-        {/* 4. Multilingual Translations & Explanations */}
+        {/* 4. Multilingual Word Translations & Exact Meanings */}
         <div className="shield-multilingual-section">
           <div className="shield-multilingual-header">
             <div className="shield-sparkle-title">
               <BsStars className="sparkle-icon" size={16} />
-              <span>Multilingual Translations &amp; Explanations</span>
+              <span>Multilingual Translations &amp; Exact Meanings</span>
             </div>
-            <span className="shield-source-tag">Source: {sourceLang}</span>
+            <span className="shield-source-tag">Detected Language: {sourceLang}</span>
           </div>
 
           <div className="shield-translations-grid">
-            {/* English */}
-            <div className="shield-translation-card">
-              <div className="translation-card-top">
-                <span className="card-lang-name">{translations.english.langName}</span>
-                <span className="card-native-label">{translations.english.nativeLangLabel}</span>
-              </div>
-              <p className="translation-statement">{translations.english.statement}</p>
-              {translations.english.explanation && (
-                <p className="translation-explanation">{translations.english.explanation}</p>
-              )}
-            </div>
-
-            {/* Hindi */}
-            <div className="shield-translation-card">
-              <div className="translation-card-top">
-                <span className="card-lang-name">{translations.hindi.langName}</span>
-                <span className="card-native-label">{translations.hindi.nativeLangLabel}</span>
-              </div>
-              <p className="translation-statement">{translations.hindi.statement}</p>
-              {translations.hindi.explanation && (
-                <p className="translation-explanation">{translations.hindi.explanation}</p>
-              )}
-            </div>
-
-            {/* Telugu */}
-            <div className="shield-translation-card">
-              <div className="translation-card-top">
-                <span className="card-lang-name">{translations.telugu.langName}</span>
-                <span className="card-native-label">{translations.telugu.nativeLangLabel}</span>
-              </div>
-              <p className="translation-statement">{translations.telugu.statement}</p>
-              {translations.telugu.explanation && (
-                <p className="translation-explanation">{translations.telugu.explanation}</p>
-              )}
-            </div>
-
-            {/* Tamil */}
-            <div className="shield-translation-card">
-              <div className="translation-card-top">
-                <span className="card-lang-name">{translations.tamil.langName}</span>
-                <span className="card-native-label">{translations.tamil.nativeLangLabel}</span>
-              </div>
-              <p className="translation-statement">{translations.tamil.statement}</p>
-              {translations.tamil.explanation && (
-                <p className="translation-explanation">{translations.tamil.explanation}</p>
-              )}
-            </div>
-
-            {/* Kannada */}
-            <div className="shield-translation-card shield-card-full-width">
-              <div className="translation-card-top">
-                <span className="card-lang-name">{translations.kannada.langName}</span>
-                <span className="card-native-label">{translations.kannada.nativeLangLabel}</span>
-              </div>
-              <p className="translation-statement">{translations.kannada.statement}</p>
-              {translations.kannada.explanation && (
-                <p className="translation-explanation">{translations.kannada.explanation}</p>
-              )}
-            </div>
+            {langList.map(({ key, labelPrefix }) => {
+              const item = translations[key]
+              if (!item) return null
+              return (
+                <div key={key} className="shield-translation-card">
+                  <div className="translation-card-top">
+                    <span className="card-lang-name">{item.langName}</span>
+                    <span className="card-native-label">{item.nativeLangLabel}</span>
+                  </div>
+                  <div className="card-meaning-content">
+                    <span className="meaning-field-label">{labelPrefix}</span>
+                    <p className="translation-exact-meaning">{item.meaning}</p>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
