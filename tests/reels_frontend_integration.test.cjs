@@ -72,6 +72,14 @@ assert(reelsCode.includes('submitComment'), 'submitComment must be used for post
 assert(!reelsCode.includes('aiComment') && !reelsCode.includes('generateComment'), 'No AI rewriting or auto-generation allowed');
 console.log('✅ Comment authenticity verified: Original user text persisted, no AI rewriting pipeline.');
 
+// G. Verify Recommendation Integration & Feedback Controls
+assert(reelsCode.includes('fetchRecommendedFeed'), 'Reels.jsx must use fetchRecommendedFeed');
+assert(reelsCode.includes('trackReelInteraction'), 'Reels.jsx must track user interactions');
+assert(reelsCode.includes('sendReelFeedback'), 'Reels.jsx must support sendReelFeedback');
+assert(reelsCode.includes('Not Interested in this'), 'Not interested option must be present');
+assert(reelsCode.includes('reels-toast-notification'), 'Toast notification must be rendered');
+console.log('✅ Recommendation engine integration verified: Dynamic feed, interaction tracking, and feedback controls.');
+
 // 4. Verify Reels.css styling
 const reelsCssPath = path.join(__dirname, '..', 'src', 'components', 'Reels', 'Reels.css');
 const reelsCss = fs.readFileSync(reelsCssPath, 'utf8');
@@ -80,6 +88,8 @@ assert(!reelsCss.includes('.reel-topic-pill'), 'Obsolete .reel-topic-pill CSS mu
 assert(reelsCss.includes('.reels-category-chips-scroll'), 'CSS must include .reels-category-chips-scroll');
 assert(reelsCss.includes('.reels-category-chip-btn'), 'CSS must include .reels-category-chip-btn');
 assert(reelsCss.includes('.reel-video-controls-overlay'), 'CSS must include .reel-video-controls-overlay');
-console.log('✅ CSS verified: Controls overlay, timeline scrubber, and category chip styles confirmed.');
+assert(reelsCss.includes('.reel-recommendation-options-menu'), 'CSS must include .reel-recommendation-options-menu');
+assert(reelsCss.includes('.reels-toast-notification'), 'CSS must include .reels-toast-notification');
+console.log('✅ CSS verified: Controls overlay, timeline scrubber, category chip styles, and recommendation menu confirmed.');
 
 console.log('\n🎉 ALL REELS DIVERSITY, CLEAN UI & COMMENT PERSISTENCE TESTS PASSED!');

@@ -21,11 +21,20 @@ import {
   BsFullscreen,
   BsFullscreenExit,
   BsArrowClockwise,
+  BsEyeSlash,
+  BsPersonX,
+  BsSliders,
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
 import Header from '../Header'
 import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
 import { submitComment, fetchComments } from '../../services/commentService'
+import {
+  fetchRecommendedFeed,
+  trackReelInteraction,
+  sendReelFeedback,
+  fetchReelsAnalytics,
+} from '../../services/reelsRecommendationService'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
 
@@ -75,13 +84,16 @@ const ReelGridCard = ({ reel, onClickCard }) => {
 
   const handleLike = e => {
     e.stopPropagation()
-    if (isLiked) {
-      setIsLiked(false)
-      setLikesCount(prev => Math.max(0, prev - 1))
-    } else {
-      setIsLiked(true)
-      setLikesCount(prev => prev + 1)
-    }
+    const nextState = !isLiked
+    setIsLiked(nextState)
+    setLikesCount(prev => (nextState ? prev + 1 : Math.max(0, prev - 1)))
+    trackReelInteraction({
+      userId: 'mubashir_hussen.sk',
+      reelId: reel.id,
+      eventType: nextState ? 'like' : 'unlike',
+      category: reel.category,
+      creatorName: reel.user_name,
+    })
   }
 
   return (
@@ -166,6 +178,7 @@ const ReelGridCard = ({ reel, onClickCard }) => {
 }
 
 const Reels = () => {
+  const currentUserId = 'mubashir_hussen.sk'
   const [searchInput, setSearchInput] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedReelModal, setSelectedReelModal] = useState(null)
@@ -182,6 +195,18 @@ const Reels = () => {
   const [shieldAlert, setShieldAlert] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [allReels, setAllReels] = useState(DIVERSE_REELS_LIST)
+
+  // Recommendation & Feedback States
+  const [feedSessionId, setFeedSessionId] = useState(null)
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false)
+  const [toastMessage, setToastMessage] = useState(null)
+  const watchStartTimeRef = useRef(null)
+  const completionTrackedRef = useRef(false)
+
+  const showToast = msg => {
+    setToastMessage(msg)
+    setTimeout(() => setToastMessage(null), 3500)
+  }
 
   // Advanced Native Video Player States
   const [currentTime, setCurrentTime] = useState(0)
@@ -259,6 +284,18 @@ const Reels = () => {
     setVideoError(false)
     setIsBuffering(false)
     setCommentsLoading(true)
+    setShowOptionsMenu(false)
+
+    // Interaction tracking: Record playback start & view
+    watchStartTimeRef.current = Date.now()
+    completionTrackedRef.current = false
+    trackReelInteraction({
+      userId: currentUserId,
+      reelId: reel.id,
+      eventType: 'view',
+      category: reel.category,
+      creatorName: reel.user_name,
+    })
 
     // Load authentic stored comments for this specific reel from backend/localStorage
     try {
@@ -341,6 +378,13 @@ const Reels = () => {
       setModalComments(prev => [...prev, newComment])
       if (selectedReelModal) {
         selectedReelModal.comments_count = (selectedReelModal.comments_count || 0) + 1
+        trackReelInteraction({
+          userId: currentUserId,
+          reelId: selectedReelModal.id,
+          eventType: 'comment',
+          category: selectedReelModal.category,
+          creatorName: selectedReelModal.user_name,
+        })
       }
     } catch {
       setCommentError('Unable to post your comment right now. Please try again.')
@@ -349,32 +393,120 @@ const Reels = () => {
     }
   }
 
-  const loadReels = async () => {
+  const handleCloseModal = () => {
+    if (selectedReelModal && watchStartTimeRef.current) {
+      const watchedSecs = (Date.now() - watchStartTimeRef.current) / 1000
+      if (watchedSecs >= 1.0) {
+        trackReelInteraction({
+          userId: currentUserId,
+          reelId: selectedReelModal.id,
+          eventType: 'watch_duration',
+          durationSeconds: watchedSecs,
+          category: selectedReelModal.category,
+          creatorName: selectedReelModal.user_name,
+        })
+      }
+    }
+    if (modalVideoRef.current) {
+      modalVideoRef.current.pause()
+    }
+    setSelectedReelModal(null)
+    setShowOptionsMenu(false)
+  }
+
+  const handleToggleModalLike = () => {
+    if (!selectedReelModal) return
+    const nextState = !modalLiked
+    setModalLiked(nextState)
+    setModalLikesCount(prev => (nextState ? prev + 1 : Math.max(0, prev - 1)))
+    trackReelInteraction({
+      userId: currentUserId,
+      reelId: selectedReelModal.id,
+      eventType: nextState ? 'like' : 'unlike',
+      category: selectedReelModal.category,
+      creatorName: selectedReelModal.user_name,
+    })
+  }
+
+  const handleToggleModalSave = () => {
+    if (!selectedReelModal) return
+    const nextState = !modalSaved
+    setModalSaved(nextState)
+    trackReelInteraction({
+      userId: currentUserId,
+      reelId: selectedReelModal.id,
+      eventType: nextState ? 'save' : 'unsave',
+      category: selectedReelModal.category,
+      creatorName: selectedReelModal.user_name,
+    })
+  }
+
+  const handleFeedbackAction = async action => {
+    if (!selectedReelModal) return
+    const targetReelId = selectedReelModal.id
+    const targetCreator = selectedReelModal.user_name
+    setShowOptionsMenu(false)
+
+    if (action === 'not_interested') {
+      await sendReelFeedback({
+        userId: currentUserId,
+        action: 'not_interested',
+        reelId: targetReelId,
+      })
+      setAllReels(prev => prev.filter(r => r.id !== targetReelId))
+      handleCloseModal()
+      showToast("Reel hidden. We'll tune your recommendation feed.")
+    } else if (action === 'hide_creator') {
+      await sendReelFeedback({
+        userId: currentUserId,
+        action: 'hide_creator',
+        creatorName: targetCreator,
+      })
+      setAllReels(prev => prev.filter(r => r.user_name !== targetCreator))
+      handleCloseModal()
+      showToast(`Hidden all reels from @${targetCreator}.`)
+    } else if (action === 'reset_preferences') {
+      await sendReelFeedback({
+        userId: currentUserId,
+        action: 'reset_preferences',
+      })
+      handleCloseModal()
+      loadReels(true)
+      showToast('Recommendation preferences reset to neutral.')
+    }
+  }
+
+  const loadReels = async (refresh = false) => {
     try {
-      const response = await fetch(`${BACKEND_API_BASE}/api/reels?limit=100`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data && Array.isArray(data.reels) && data.reels.length > 0) {
-          const custom = getCustomFeedPosts().filter(p => p.is_video && p.video_url)
-          const formattedCustom = custom.map(c => ({
-            id: c.post_id,
-            user_name: c.user_name,
-            profile_pic: c.profile_pic,
-            is_verified: false,
-            topic: 'My Reel',
-            category: 'Miscellaneous Trending Content',
-            tag: '🎥 Video',
-            video_url: c.video_url,
-            caption: c.caption,
-            audio_info: c.audio_info,
-            views: '1',
-            likes_count: c.likes_count || 0,
-            comments_count: c.comments_count || 0,
-            post_link: c.post_link,
-          }))
-          setAllReels([...formattedCustom, ...data.reels])
-          return
-        }
+      const feedData = await fetchRecommendedFeed({
+        userId: currentUserId,
+        sessionId: refresh ? null : feedSessionId,
+        page: 1,
+        limit: 60,
+        refresh,
+        category: selectedCategory !== 'All' ? selectedCategory : null,
+      })
+      if (feedData && feedData.success && Array.isArray(feedData.reels) && feedData.reels.length > 0) {
+        setFeedSessionId(feedData.session_id)
+        const custom = getCustomFeedPosts().filter(p => p.is_video && p.video_url)
+        const formattedCustom = custom.map(c => ({
+          id: c.post_id,
+          user_name: c.user_name,
+          profile_pic: c.profile_pic,
+          is_verified: false,
+          topic: 'My Reel',
+          category: 'Miscellaneous Trending Content',
+          tag: '🎥 Video',
+          video_url: c.video_url,
+          caption: c.caption,
+          audio_info: c.audio_info,
+          views: '1',
+          likes_count: c.likes_count || 0,
+          comments_count: c.comments_count || 0,
+          post_link: c.post_link,
+        }))
+        setAllReels([...formattedCustom, ...feedData.reels])
+        return
       }
     } catch {
       // Local or network fallback to DIVERSE_REELS_LIST
@@ -403,8 +535,11 @@ const Reels = () => {
 
   useEffect(() => {
     loadReels()
-    window.addEventListener('new_post_created', loadReels)
-    return () => window.removeEventListener('new_post_created', loadReels)
+  }, [selectedCategory])
+
+  useEffect(() => {
+    window.addEventListener('new_post_created', () => loadReels(true))
+    return () => window.removeEventListener('new_post_created', () => loadReels(true))
   }, [])
 
   const visibleReels = allReels.filter(reel => {
@@ -461,23 +596,13 @@ const Reels = () => {
       {selectedReelModal && (
         <div
           className="reel-dark-modal-backdrop"
-          onClick={() => {
-            if (modalVideoRef.current) {
-              modalVideoRef.current.pause()
-            }
-            setSelectedReelModal(null)
-          }}
+          onClick={handleCloseModal}
           role="presentation"
         >
           <button
             type="button"
             className="reel-dark-close-corner-btn"
-            onClick={() => {
-              if (modalVideoRef.current) {
-                modalVideoRef.current.pause()
-              }
-              setSelectedReelModal(null)
-            }}
+            onClick={handleCloseModal}
             aria-label="Close"
           >
             <BsX size={34} />
@@ -513,8 +638,22 @@ const Reels = () => {
                   className="reel-dark-video-player"
                   onTimeUpdate={() => {
                     if (modalVideoRef.current) {
-                      setCurrentTime(modalVideoRef.current.currentTime)
-                      setDuration(modalVideoRef.current.duration || 0)
+                      const cur = modalVideoRef.current.currentTime
+                      const dur = modalVideoRef.current.duration || 0
+                      setCurrentTime(cur)
+                      setDuration(dur)
+                      if (dur > 0 && cur / dur >= 0.90 && !completionTrackedRef.current && selectedReelModal) {
+                        completionTrackedRef.current = true
+                        trackReelInteraction({
+                          userId: currentUserId,
+                          reelId: selectedReelModal.id,
+                          eventType: 'completion',
+                          durationSeconds: cur,
+                          percentageWatched: (cur / dur) * 100,
+                          category: selectedReelModal.category,
+                          creatorName: selectedReelModal.user_name,
+                        })
+                      }
                     }
                   }}
                   onLoadedMetadata={() => {
@@ -692,17 +831,58 @@ const Reels = () => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    className="reel-dark-options-btn"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(selectedReelModal.post_link || window.location.href)
-                      alert('Reel link copied to clipboard! 📋')
-                    }}
-                    title="More options"
-                  >
-                    <BsThreeDots size={18} />
-                  </button>
+                  <div className="reel-dark-options-container">
+                    <button
+                      type="button"
+                      className="reel-dark-options-btn"
+                      onClick={() => setShowOptionsMenu(prev => !prev)}
+                      title="More options"
+                      aria-label="More options"
+                    >
+                      <BsThreeDots size={18} />
+                    </button>
+
+                    {showOptionsMenu && (
+                      <div className="reel-recommendation-options-menu">
+                        <button
+                          type="button"
+                          className="recs-option-item negative-action"
+                          onClick={() => handleFeedbackAction('not_interested')}
+                        >
+                          <BsEyeSlash size={15} />
+                          <span>Not Interested in this</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="recs-option-item negative-action"
+                          onClick={() => handleFeedbackAction('hide_creator')}
+                        >
+                          <BsPersonX size={15} />
+                          <span>Don't recommend @{selectedReelModal.user_name}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="recs-option-item"
+                          onClick={() => handleFeedbackAction('reset_preferences')}
+                        >
+                          <BsSliders size={15} />
+                          <span>Reset Feed Recommendations</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="recs-option-item"
+                          onClick={() => {
+                            setShowOptionsMenu(false)
+                            navigator.clipboard?.writeText(selectedReelModal.post_link || window.location.href)
+                            showToast('Reel link copied to clipboard! 📋')
+                          }}
+                        >
+                          <BsSend size={15} />
+                          <span>Copy Reel Link</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* 2. Scrollable Body: Caption & Authentic Comments */}
@@ -786,15 +966,7 @@ const Reels = () => {
                       <button
                         type="button"
                         className={`reel-dark-icon-btn ${modalLiked ? 'liked' : ''}`}
-                        onClick={() => {
-                          if (modalLiked) {
-                            setModalLiked(false)
-                            setModalLikesCount(prev => Math.max(0, prev - 1))
-                          } else {
-                            setModalLiked(true)
-                            setModalLikesCount(prev => prev + 1)
-                          }
-                        }}
+                        onClick={handleToggleModalLike}
                         aria-label="Like"
                       >
                         {modalLiked ? <BsHeartFill color="#ff3040" size={22} /> : <BsHeart size={22} />}
@@ -807,7 +979,7 @@ const Reels = () => {
                         className="reel-dark-icon-btn"
                         onClick={() => {
                           navigator.clipboard?.writeText(selectedReelModal.post_link || window.location.href)
-                          alert('Reel link copied! 📋')
+                          showToast('Reel link copied to clipboard! 📋')
                         }}
                         aria-label="Share"
                       >
@@ -818,7 +990,7 @@ const Reels = () => {
                     <button
                       type="button"
                       className="reel-dark-icon-btn"
-                      onClick={() => setModalSaved(prev => !prev)}
+                      onClick={handleToggleModalSave}
                       aria-label="Save"
                     >
                       {modalSaved ? <BsBookmarkFill color="#ffffff" size={22} /> : <BsBookmark size={22} />}
@@ -886,6 +1058,13 @@ const Reels = () => {
           blockResult={shieldAlert}
           onClose={() => setShieldAlert(null)}
         />
+      )}
+
+      {/* Dynamic Recommendation & Moderation Toast Notification */}
+      {toastMessage && (
+        <div className="reels-toast-notification" role="status" aria-live="polite">
+          <span>{toastMessage}</span>
+        </div>
       )}
     </div>
   )

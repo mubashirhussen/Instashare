@@ -80,3 +80,55 @@ class AnalyticsResponse(BaseModel):
     toxicityRate: str
     averageConfidence: str
     categoriesBreakdown: Dict[str, int]
+
+# --- Reels Recommendation Engine Schemas ---
+
+class ReelInteractionEvent(BaseModel):
+    user_id: str = Field("guest_user", description="Authenticated user ID or guest identifier")
+    reel_id: str = Field(..., description="Target reel identifier")
+    event_type: str = Field(..., description="view, watch_duration, completion, like, unlike, save, unsave, comment, share, skip, not_interested, hide_creator, report")
+    duration_seconds: Optional[float] = Field(0.0, description="Duration watched in seconds")
+    percentage_watched: Optional[float] = Field(0.0, description="Percentage of reel watched (0.0 to 100.0)")
+    category: Optional[str] = None
+    creator_name: Optional[str] = None
+    session_id: Optional[str] = None
+    timestamp: Optional[str] = None
+
+class ReelInteractionBatchRequest(BaseModel):
+    events: List[ReelInteractionEvent]
+
+class ReelFeedbackRequest(BaseModel):
+    user_id: str = Field("guest_user", description="User identifier")
+    action: str = Field(..., description="not_interested, hide_creator, reset_preferences")
+    reel_id: Optional[str] = None
+    creator_name: Optional[str] = None
+    category: Optional[str] = None
+
+class UserPreferencesUpdateRequest(BaseModel):
+    user_id: str = Field(..., description="User identifier")
+    preferred_categories: List[str] = Field(..., description="List of chosen interest categories")
+
+class ReelRecommendationResponse(BaseModel):
+    success: bool
+    session_id: str
+    page: int
+    limit: int
+    total: int
+    has_more: bool
+    reels: List[Dict[str, Any]]
+    categories_represented: List[str] = []
+    exploration_count: int = 0
+
+class RecommendationAnalyticsResponse(BaseModel):
+    user_id: str
+    total_interactions: int
+    category_distribution: Dict[str, int]
+    top_categories: List[str]
+    diversity_score: float
+    exploration_rate: float
+    total_watched_seconds: float
+    completion_count: int
+    likes_count: int
+    saves_count: int
+    suppressed_reels_count: int
+    hidden_creators_count: int

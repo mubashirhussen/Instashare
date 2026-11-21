@@ -1,0 +1,18 @@
+{
+  "test_user_rec_001": {
+    "user_id": "test_user_rec_001",
+    "explicit_interests": [],
+    "category_scores": {},
+    "creator_scores": {},
+    "liked_reels": [],
+    "saved_reels": [],
+    "completed_reels": [],
+    "skipped_reels": [],
+    "not_interested_reels": [],
+    "hidden_creators": [],
+    "reported_reels": [],
+    "watch_history": {},
+    "total_watched_seconds": 0.0,
+    "interaction_count": 0
+  }
+}

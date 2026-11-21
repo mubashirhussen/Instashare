@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 import os
 import shutil
 import uuid
@@ -19,9 +19,16 @@ from models.schemas import (
     ModerationResponse,
     VideoModerationResponse,
     ModerationLogSchema,
-    AnalyticsResponse
+    AnalyticsResponse,
+    ReelInteractionEvent,
+    ReelInteractionBatchRequest,
+    ReelFeedbackRequest,
+    UserPreferencesUpdateRequest,
+    ReelRecommendationResponse,
+    RecommendationAnalyticsResponse
 )
 from services.ml_pipelines import text_pipeline, image_pipeline, video_pipeline
+from services.recommendation_engine import recommendation_engine
 
 app = FastAPI(
     title="SocialShield AI Moderation API",
@@ -252,6 +259,97 @@ def get_reels(
         "total_pages": total_pages,
         "categories": categories,
         "reels": paginated_reels
+    }
+
+# --- Reels Dynamic Recommendation & Personalization Endpoints ---
+
+@app.get("/api/reels/feed")
+def get_reels_feed(
+    user_id: str = "guest_user",
+    session_id: Optional[str] = None,
+    page: int = 1,
+    limit: int = 10,
+    refresh: bool = False,
+    category: Optional[str] = None
+):
+    """
+    Dynamically selected, ranked, and diversified Reels recommendation feed.
+    Personalized using user interaction history, category affinity, completion rate,
+    and anti-clustering diversity reranking.
+    """
+    return recommendation_engine.get_feed(
+        user_id=user_id,
+        session_id=session_id,
+        page=page,
+        limit=limit,
+        refresh=refresh,
+        category_filter=category
+    )
+
+@app.post("/api/reels/track")
+def track_reel_interaction(payload: Dict[str, Any]):
+    """
+    Tracks single interaction or batch interaction events:
+    view, watch_duration, completion, like, unlike, save, unsave, comment, share, skip.
+    """
+    events = payload.get("events") if "events" in payload else [payload]
+    results = []
+    for ev in events:
+        res = recommendation_engine.track_event(
+            user_id=ev.get("user_id", "guest_user"),
+            reel_id=ev.get("reel_id", ""),
+            event_type=ev.get("event_type", "view"),
+            duration_seconds=float(ev.get("duration_seconds") or 0.0),
+            percentage_watched=float(ev.get("percentage_watched") or 0.0),
+            category=ev.get("category"),
+            creator_name=ev.get("creator_name"),
+        )
+        results.append(res)
+    return {"success": True, "processed": len(results), "events": results}
+
+@app.post("/api/reels/feedback")
+def apply_reels_feedback(request: ReelFeedbackRequest):
+    """
+    Explicit user preference & moderation controls:
+    not_interested (suppress reel & soft category penalty),
+    hide_creator (hard block on creator),
+    reset_preferences (reset to cold-start neutral).
+    """
+    return recommendation_engine.apply_feedback(
+        user_id=request.user_id,
+        action=request.action,
+        reel_id=request.reel_id,
+        creator_name=request.creator_name
+    )
+
+@app.get("/api/reels/analytics")
+def get_reels_analytics(user_id: str = "guest_user"):
+    """
+    Retrieves diversity metrics (entropy score, category distribution, exploration rate).
+    """
+    return recommendation_engine.get_analytics(user_id=user_id)
+
+@app.post("/api/reels/preferences")
+def update_reels_preferences(request: UserPreferencesUpdateRequest):
+    """
+    Updates explicit user-chosen interest categories for cold-start and customization.
+    """
+    return recommendation_engine.update_preferences(
+        user_id=request.user_id,
+        preferred_categories=request.preferred_categories
+    )
+
+@app.get("/api/reels/preferences")
+def get_reels_preferences(user_id: str = "guest_user"):
+    """
+    Retrieves user explicit preferences and category affinity scores.
+    """
+    profile = recommendation_engine.get_or_create_profile(user_id)
+    return {
+        "success": True,
+        "user_id": user_id,
+        "explicit_interests": profile.explicit_interests,
+        "category_scores": profile.category_scores
     }
 
 @app.get("/api/comments")
