@@ -29,412 +29,46 @@ import { submitComment, fetchComments } from '../../services/commentService'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
 
-// 25 Curated 5:5 Grid Sample Learning Videos with User Provided Reel Links
-const LEARNING_REELS_LIST = [
-  // 1. Ddvzl8agg72
-  {
-    id: 'reel_ddvzl8agg72',
-    user_name: 'react_mastery',
-    profile_pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_verified: true,
-    topic: 'React 19 Actions',
-    tag: '⚛️ React 19',
-    post_link: 'https://www.instagram.com/reel/Ddvzl8agg72/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'React 19 Actions & useActionState hook in 45 seconds! Simplify async form handling & optimistic UI ⚡ #React #WebDev #JavaScript',
-    audio_info: 'react_mastery • Code Flow',
-    views: '284K',
-    likes_count: 11420,
-    comments_count: 412,
-  },
-  // 2. DdtVeIohU3c
-  {
-    id: 'reel_ddtveiohu3c',
-    user_name: 'pycode.dev',
-    profile_pic: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150',
-    is_verified: true,
-    topic: 'Python Tricks',
-    tag: '🐍 Python',
-    post_link: 'https://www.instagram.com/reel/DdtVeIohU3c/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'Top 5 Python One-Liners that make you look like a Senior Engineer 🚀 List comprehensions & Walrus operator!',
-    audio_info: 'pycode.dev • Python Beats',
-    views: '390K',
-    likes_count: 14890,
-    comments_count: 530,
-  },
-  // 3. Dc5gD-FSsf8
-  {
-    id: 'reel_dc5gd_fssf8',
-    user_name: 'codenloop',
-    profile_pic: '/codenloop_story.jpg',
-    is_verified: true,
-    topic: 'DSA Stack LIFO',
-    tag: '☕ Java & DSA',
-    post_link: 'https://www.instagram.com/reel/Dc5gD-FSsf8/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Reverse String with Stack LIFO Logic 🔥 Day 17 DSA Challenge! Time O(N) | Space O(N) #Java #DSA #TeluguCoding',
-    audio_info: 'codenloop • Trending Tech',
-    views: '195K',
-    likes_count: 6240,
-    comments_count: 218,
-  },
-  // 4. DYjzhs5pbSS
-  {
-    id: 'reel_dyjzhs5pbss',
-    user_name: 'system_design_101',
-    profile_pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-    is_verified: true,
-    topic: 'Redis Caching',
-    tag: '🏗️ Architecture',
-    post_link: 'https://www.instagram.com/reel/DYjzhs5pbSS/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Redis In-Memory Caching Strategies (Cache-Aside, Write-Through, Write-Back) for Ultra High Throughput ⚡💾',
-    audio_info: 'system_design_101 • Deep Focus',
-    views: '320K',
-    likes_count: 12100,
-    comments_count: 395,
-  },
-  // 5. DdjHGWNIe3A
-  {
-    id: 'reel_ddjhgwnie3a',
-    user_name: 'nodejs_backend',
-    profile_pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    is_verified: true,
-    topic: 'Node Event Loop',
-    tag: '⚡ Node.js',
-    post_link: 'https://www.instagram.com/reel/DdjHGWNIe3A/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'How the Node.js Event Loop works under the hood 🌐 Microtasks, Timers, and I/O polling simplified!',
-    audio_info: 'nodejs_backend • Backend Focus',
-    views: '178K',
-    likes_count: 5890,
-    comments_count: 184,
-  },
-  // 6. DcyQ3gZoAzm
-  {
-    id: 'reel_dcyq3gzoazm',
-    user_name: 'css_wizard',
-    profile_pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_verified: true,
-    topic: 'CSS Grid',
-    tag: '🎨 UI/UX',
-    post_link: 'https://www.instagram.com/reel/DcyQ3gZoAzm/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'One-line responsive layout superpower: grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))! ✨',
-    audio_info: 'css_wizard • UI Magic',
-    views: '260K',
-    likes_count: 8940,
-    comments_count: 245,
-  },
-  // 7. DcD0l_RTlIU
-  {
-    id: 'reel_dcd0l_rtliu',
-    user_name: 'typescript_pro',
-    profile_pic: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
-    is_verified: true,
-    topic: 'TypeScript Generics',
-    tag: '📘 TypeScript',
-    post_link: 'https://www.instagram.com/p/DcD0l_RTlIU/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Master TypeScript Generics in 60s! Create reusable, strictly type-safe API wrappers effortlessly 🛡️',
-    audio_info: 'typescript_pro • Type Flow',
-    views: '145K',
-    likes_count: 4720,
-    comments_count: 132,
-  },
-  // 8. DaNjIVrJs0o
-  {
-    id: 'reel_danjivrs0o',
-    user_name: 'docker_devops',
-    profile_pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    is_verified: true,
-    topic: 'Docker Builds',
-    tag: '🐳 DevOps',
-    post_link: 'https://www.instagram.com/reel/DaNjIVrJs0o/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Multi-stage Docker builds: Shrink your Node/React production image from 1.2GB to under 50MB 🚀📦',
-    audio_info: 'docker_devops • Cloud Audio',
-    views: '210K',
-    likes_count: 7350,
-    comments_count: 198,
-  },
-  // 9. DdghvalJ9jK
-  {
-    id: 'reel_ddghvalj9jk',
-    user_name: 'database_hub',
-    profile_pic: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-    is_verified: true,
-    topic: 'PostgreSQL vs MongoDB',
-    tag: '🗄️ Database',
-    post_link: 'https://www.instagram.com/reel/DdghvalJ9jK/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'When to choose PostgreSQL vs MongoDB? ACID transactions vs flexible JSON schemas explained clearly! 📊🍃',
-    audio_info: 'database_hub • Data Beats',
-    views: '185K',
-    likes_count: 6180,
-    comments_count: 167,
-  },
-  // 10. DdjU5NlpUW2
-  {
-    id: 'reel_ddju5nlpuw2',
-    user_name: 'nextjs_daily',
-    profile_pic: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=150',
-    is_verified: true,
-    topic: 'Next.js 15 Actions',
-    tag: '⚛️ Frontend',
-    post_link: 'https://www.instagram.com/reel/DdjU5NlpUW2/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'Next.js 15 Server Actions vs API Routes: When should you use which? Real-time mutations made easy! 🚀',
-    audio_info: 'nextjs_daily • Next Vibe',
-    views: '290K',
-    likes_count: 10450,
-    comments_count: 340,
-  },
-  // 11. DdqA1K5MrN5
-  {
-    id: 'reel_ddqa1k5mrn5',
-    user_name: 'ai_engineers',
-    profile_pic: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=150',
-    is_verified: true,
-    topic: 'AI Agents',
-    tag: '🤖 AI/ML',
-    post_link: 'https://www.instagram.com/reel/DdqA1K5MrN5/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Building Autonomous AI coding agents with function calling and tool execution loops 🤖💡 #AI #Python',
-    audio_info: 'ai_engineers • Future AI',
-    views: '450K',
-    likes_count: 16200,
-    comments_count: 610,
-  },
-  // 12. DcgN_TrBjl-
-  {
-    id: 'reel_dcgn_trbjl',
-    user_name: 'dsa_visualizer',
-    profile_pic: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-    is_verified: true,
-    topic: 'Binary Search',
-    tag: '📚 Algorithms',
-    post_link: 'https://www.instagram.com/reel/DcgN_TrBjl-/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Binary Search step-by-step pointer visualization! Halving search space for O(log N) speed ⚡ #LeetCode',
-    audio_info: 'dsa_visualizer • Logic Sound',
-    views: '340K',
-    likes_count: 11200,
-    comments_count: 380,
-  },
-  // 13. DdoXO15t553
-  {
-    id: 'reel_ddoxo15t553',
-    user_name: 'express_apis',
-    profile_pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-    is_verified: true,
-    topic: 'Express JWT',
-    tag: '⚡ Backend',
-    post_link: 'https://www.instagram.com/reel/DdoXO15t553/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'JWT Authentication middleware in Express.js: Protect protected routes with verifyToken in 5 lines 🔐🛡️',
-    audio_info: 'express_apis • Security Beat',
-    views: '165K',
-    likes_count: 5240,
-    comments_count: 155,
-  },
-  // 14. DdoQpWyIpwQ
-  {
-    id: 'reel_ddoqpwyipwq',
-    user_name: 'graphql_guide',
-    profile_pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-    is_verified: true,
-    topic: 'GraphQL vs REST',
-    tag: '🌐 API Design',
-    post_link: 'https://www.instagram.com/reel/DdoQpWyIpwQ/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'GraphQL vs REST: Eliminate over-fetching and under-fetching with single declarative query schemas 📡✨',
-    audio_info: 'graphql_guide • GraphQL Pulse',
-    views: '150K',
-    likes_count: 4890,
-    comments_count: 140,
-  },
-  // 15. Ddlr3nZzLwl
-  {
-    id: 'reel_ddlr3nzzlwl',
-    user_name: 'golang_channel',
-    profile_pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    is_verified: true,
-    topic: 'Go Goroutines',
-    tag: '🐹 Golang',
-    post_link: 'https://www.instagram.com/reel/Ddlr3nZzLwl/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Go Goroutines & Channels: Lightweight concurrent programming with zero thread overhead ⚡🐹',
-    audio_info: 'golang_channel • Go Rhythms',
-    views: '205K',
-    likes_count: 7120,
-    comments_count: 220,
-  },
-  // 16. DdiUx_kT6GK
-  {
-    id: 'reel_ddiux_kt6gk',
-    user_name: 'clean_coder',
-    profile_pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_verified: true,
-    topic: 'SOLID Principles',
-    tag: '📐 Architecture',
-    post_link: 'https://www.instagram.com/reel/DdiUx_kT6GK/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Single Responsibility & Dependency Inversion in React and Node: Write testable, decouple code 💡✨',
-    audio_info: 'clean_coder • Ambient Focus',
-    views: '230K',
-    likes_count: 7890,
-    comments_count: 245,
-  },
-  // 17. Dds5p5sybc3
-  {
-    id: 'reel_dds5p5sybc3',
-    user_name: 'websocket_realtime',
-    profile_pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
-    is_verified: true,
-    topic: 'WebSockets',
-    tag: '💬 Realtime',
-    post_link: 'https://www.instagram.com/reel/Dds5p5sybc3/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'Bidirectional full-duplex communication with Socket.io & ws: Build instant real-time apps 💬🔔',
-    audio_info: 'websocket_realtime • Realtime Pulse',
-    views: '275K',
-    likes_count: 9400,
-    comments_count: 310,
-  },
-  // 18. Ddty13cB_mm
-  {
-    id: 'reel_ddty13cb_mm',
-    user_name: 'fullstack_roadmap',
-    profile_pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    is_verified: true,
-    topic: 'Fullstack 2026',
-    tag: '🚀 Career',
-    post_link: 'https://www.instagram.com/reel/Ddty13cB_mm/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'The Ultimate 2026 Full Stack Developer Roadmap: React, Node, Cloud, AI & System Architecture 🗺️✨',
-    audio_info: 'fullstack_roadmap • Inspiration',
-    views: '520K',
-    likes_count: 18900,
-    comments_count: 750,
-  },
-  // 19. Git Interactive Rebase
-  {
-    id: 'lr_19_git',
-    user_name: 'git_hacks',
-    profile_pic: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=150',
-    is_verified: true,
-    topic: 'Git Workflow',
-    tag: '🔧 DevOps',
-    post_link: 'https://www.instagram.com/p/git_rebase/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Git Interactive Rebase (git rebase -i HEAD~N): Squash messy commits into clean history like a pro! 🧹💻',
-    audio_info: 'git_hacks • Clean Code',
-    views: '158K',
-    likes_count: 4720,
-    comments_count: 130,
-  },
-  // 20. Tailwind CSS
-  {
-    id: 'lr_20_tailwind',
-    user_name: 'tailwind_ninja',
-    profile_pic: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
-    is_verified: true,
-    topic: 'Tailwind CSS',
-    tag: '🎨 UI/UX',
-    post_link: 'https://www.instagram.com/p/tailwind_tips/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Custom Tailwind plugins, CSS variables, and dark mode transitions in under 60 seconds 🎨⚡',
-    audio_info: 'tailwind_ninja • Synthwave',
-    views: '205K',
-    likes_count: 6420,
-    comments_count: 190,
-  },
-  // 21. FastAPI Python
-  {
-    id: 'lr_21_fastapi',
-    user_name: 'fastapi_python',
-    profile_pic: 'https://images.unsplash.com/photo-1516116211227-bbc141a0670d?w=150',
-    is_verified: true,
-    topic: 'FastAPI',
-    tag: '🐍 Python',
-    post_link: 'https://www.instagram.com/p/fastapi_tips/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'Why FastAPI is the highest performance Python backend framework: Async Pydantic validation & Auto Docs ⚡',
-    audio_info: 'fastapi_python • Python Tech',
-    views: '230K',
-    likes_count: 7120,
-    comments_count: 210,
-  },
-  // 22. MongoDB Aggregation Pipeline
-  {
-    id: 'lr_22_mongodb',
-    user_name: 'mongodb_masters',
-    profile_pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    is_verified: true,
-    topic: 'MongoDB Pipeline',
-    tag: '🗄️ Database',
-    post_link: 'https://www.instagram.com/p/mongodb_pipeline/',
-    video_url: '/videos/sample_reel_2.mp4',
-    caption: 'MongoDB Aggregation Pipeline ($match, $group, $lookup, $project) explained visually in 1 minute 🍃📊',
-    audio_info: 'mongodb_masters • DB Sound',
-    views: '185K',
-    likes_count: 5640,
-    comments_count: 168,
-  },
-  // 23. Binary Tree Traversals
-  {
-    id: 'lr_23_trees',
-    user_name: 'dsa_trees',
-    profile_pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-    is_verified: true,
-    topic: 'Binary Trees',
-    tag: '📚 Algorithms',
-    post_link: 'https://www.instagram.com/p/binary_trees/',
-    video_url: '/videos/tech_reel_1.mp4',
-    caption: 'Inorder, Preorder, and Postorder DFS Tree Traversals animated simply! Ace your FAANG interviews 🌳💻',
-    audio_info: 'dsa_trees • Code Rhythms',
-    views: '260K',
-    likes_count: 8100,
-    comments_count: 270,
-  },
-  // 24. Web Security & OWASP
-  {
-    id: 'lr_24_security',
-    user_name: 'web_security',
-    profile_pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_verified: true,
-    topic: 'Cybersecurity',
-    tag: '🛡️ Security',
-    post_link: 'https://www.instagram.com/p/web_security/',
-    video_url: '/videos/tech_reel_2.mp4',
-    caption: 'Preventing XSS, CSRF, and SQL Injection attacks in modern full stack web applications 🛡️🔒',
-    audio_info: 'web_security • Cyber Beat',
-    views: '215K',
-    likes_count: 6890,
-    comments_count: 212,
-  },
-  // 25. NextGen AI Academy
-  {
-    id: 'lr_25_ai',
-    user_name: 'nextgendataaiacademy',
-    profile_pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-    is_verified: true,
-    topic: 'NextGen AI',
-    tag: '🤖 AI Academy',
-    post_link: 'https://www.instagram.com/p/nextgen_ai/',
-    video_url: '/videos/sample_reel_1.mp4',
-    caption: 'Junior writes 10 lines... Senior writes 1 line. Explore how AI pipelines transform messy data workflows effortlessly 🧠⚡',
-    audio_info: 'nextgendataaiacademy • AI Pulse',
-    views: '380K',
-    likes_count: 14200,
-    comments_count: 490,
-  },
+import DIVERSE_REELS_LIST from '../../data/reelsData.json'
+
+const BACKEND_API_BASE =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? 'https://socialshield-backend.onrender.com'
+    : 'http://localhost:8000')
+
+export { DIVERSE_REELS_LIST }
+export const LEARNING_REELS_LIST = DIVERSE_REELS_LIST
+
+export const REEL_CATEGORIES = [
+  'All',
+  'Education',
+  'Technology',
+  'Artificial Intelligence',
+  'Sports',
+  'Nature',
+  'Travel',
+  'Food',
+  'Movies and Entertainment',
+  'Dialogues and Comedy',
+  'Bikes and Automobiles',
+  'Gaming',
+  'Fitness and Health',
+  'Lifestyle',
+  'Music and Dance',
+  'Photography and Creativity',
+  'Science and Innovation',
+  'Motivation and Personal Development',
+  'Architecture and Design',
+  'Animals and Pets',
+  'Miscellaneous Trending Content',
 ]
 
+/**
+ * Clean, immersive Reel Card without distracting top badges or overlays.
+ * Verification badge is conditionally displayed only for genuine verified accounts.
+ */
 const ReelGridCard = ({ reel, onClickCard }) => {
-  const [isMuted, setIsMuted] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(reel.likes_count || 0)
   const videoRef = useRef(null)
@@ -448,11 +82,6 @@ const ReelGridCard = ({ reel, onClickCard }) => {
       setIsLiked(true)
       setLikesCount(prev => prev + 1)
     }
-  }
-
-  const handleSoundToggle = e => {
-    e.stopPropagation()
-    setIsMuted(prev => !prev)
   }
 
   return (
@@ -471,39 +100,21 @@ const ReelGridCard = ({ reel, onClickCard }) => {
         <video
           ref={videoRef}
           src={reel.video_url}
+          poster={reel.thumbnail_url}
           className="reel-grid-video"
           playsInline
           loop
           autoPlay
-          muted={isMuted}
+          muted
           onError={() => {
             if (videoRef.current && !videoRef.current.src.endsWith('/videos/sample_reel_1.mp4')) {
-              videoRef.current.src = '/videos/sample_reel_1.mp4';
-              videoRef.current.load();
+              videoRef.current.src = '/videos/sample_reel_1.mp4'
+              videoRef.current.load()
             }
           }}
         />
 
-        {/* Audio Toggle */}
-        <button
-          type="button"
-          className="reel-sound-btn"
-          onClick={handleSoundToggle}
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
-        >
-          {isMuted ? <FiVolumeX size={14} /> : <FiVolume2 size={14} />}
-        </button>
-
-        {/* Top Info Bar with Learning Tag */}
-        <div className="reel-top-bar">
-          <span className="reel-topic-pill">{reel.tag || '💻 Code'}</span>
-          <div className="reel-views-pill">
-            <BsEyeFill size={11} />
-            <span>{reel.views || '50K'}</span>
-          </div>
-        </div>
-
-        {/* Bottom Details Bar */}
+        {/* Bottom Details Bar - Clean, authentic presentation without top badges */}
         <div className="reel-bottom-bar">
           <div className="reel-author-row">
             <img
@@ -536,7 +147,14 @@ const ReelGridCard = ({ reel, onClickCard }) => {
               <span>{likesCount.toLocaleString()}</span>
             </button>
 
-            <button type="button" className="reel-action-btn" onClick={e => { e.stopPropagation(); onClickCard(reel); }}>
+            <button
+              type="button"
+              className="reel-action-btn"
+              onClick={e => {
+                e.stopPropagation()
+                onClickCard(reel)
+              }}
+            >
               <BsChatFill size={14} />
               <span>{reel.comments_count || 0}</span>
             </button>
@@ -549,6 +167,7 @@ const ReelGridCard = ({ reel, onClickCard }) => {
 
 const Reels = () => {
   const [searchInput, setSearchInput] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedReelModal, setSelectedReelModal] = useState(null)
   const [modalMuted, setModalMuted] = useState(false)
   const [modalPlaying, setModalPlaying] = useState(true)
@@ -562,7 +181,7 @@ const Reels = () => {
   const [commentError, setCommentError] = useState(null)
   const [shieldAlert, setShieldAlert] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
+  const [allReels, setAllReels] = useState(DIVERSE_REELS_LIST)
 
   // Advanced Native Video Player States
   const [currentTime, setCurrentTime] = useState(0)
@@ -730,14 +349,45 @@ const Reels = () => {
     }
   }
 
-  const loadReels = () => {
+  const loadReels = async () => {
+    try {
+      const response = await fetch(`${BACKEND_API_BASE}/api/reels?limit=100`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data && Array.isArray(data.reels) && data.reels.length > 0) {
+          const custom = getCustomFeedPosts().filter(p => p.is_video && p.video_url)
+          const formattedCustom = custom.map(c => ({
+            id: c.post_id,
+            user_name: c.user_name,
+            profile_pic: c.profile_pic,
+            is_verified: false,
+            topic: 'My Reel',
+            category: 'Miscellaneous Trending Content',
+            tag: '🎥 Video',
+            video_url: c.video_url,
+            caption: c.caption,
+            audio_info: c.audio_info,
+            views: '1',
+            likes_count: c.likes_count || 0,
+            comments_count: c.comments_count || 0,
+            post_link: c.post_link,
+          }))
+          setAllReels([...formattedCustom, ...data.reels])
+          return
+        }
+      }
+    } catch {
+      // Local or network fallback to DIVERSE_REELS_LIST
+    }
+
     const custom = getCustomFeedPosts().filter(p => p.is_video && p.video_url)
     const formattedCustom = custom.map(c => ({
       id: c.post_id,
       user_name: c.user_name,
       profile_pic: c.profile_pic,
-      is_verified: true,
+      is_verified: false,
       topic: 'My Reel',
+      category: 'Miscellaneous Trending Content',
       tag: '🎥 Video',
       video_url: c.video_url,
       caption: c.caption,
@@ -748,7 +398,7 @@ const Reels = () => {
       post_link: c.post_link,
     }))
 
-    setAllReels([...formattedCustom, ...LEARNING_REELS_LIST])
+    setAllReels([...formattedCustom, ...DIVERSE_REELS_LIST])
   }
 
   useEffect(() => {
@@ -757,19 +407,40 @@ const Reels = () => {
     return () => window.removeEventListener('new_post_created', loadReels)
   }, [])
 
-  const visibleReels = searchInput.trim()
-    ? allReels.filter(reel =>
-        `${reel.caption} ${reel.user_name} ${reel.topic || ''} ${reel.tag || ''}`
-          .toLowerCase()
-          .includes(searchInput.toLowerCase()),
-      )
-    : allReels
+  const visibleReels = allReels.filter(reel => {
+    const matchesCategory =
+      selectedCategory === 'All' ||
+      (reel.category && reel.category.toLowerCase() === selectedCategory.toLowerCase()) ||
+      (reel.topic && reel.topic.toLowerCase() === selectedCategory.toLowerCase())
+
+    const matchesSearch =
+      !searchInput.trim() ||
+      `${reel.caption} ${reel.user_name} ${reel.category || ''} ${reel.topic || ''} ${reel.tag || ''}`
+        .toLowerCase()
+        .includes(searchInput.toLowerCase())
+
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <div className="reels-page-layout">
       <Header searchInput={searchInput} setSearchInput={setSearchInput} />
       
       <main className="reels-container-main">
+        {/* Category Filter Chips Bar */}
+        <div className="reels-category-chips-scroll" role="tablist" aria-label="Reels Categories">
+          {REEL_CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              type="button"
+              className={`reels-category-chip-btn ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         {/* 5:5 Side-by-Side Reels Grid Structure */}
         <section className="side-by-side-reels-grid-5">
           {visibleReels.length > 0 ? (

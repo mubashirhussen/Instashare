@@ -8,6 +8,7 @@ import uuid
 import html
 import json
 import time
+import math
 from datetime import datetime
 
 from models.schemas import (
@@ -188,6 +189,70 @@ def predict_text(request: TextModerationRequest):
 def predict_comment(request: TextModerationRequest):
     request.context = "comment"
     return predict_text(request)
+
+# Persistent Reels Database Engine
+REELS_FILE_PATH = os.path.join(os.path.dirname(__file__), "data", "reels_db.json")
+
+def load_stored_reels() -> List[dict]:
+    if os.path.exists(REELS_FILE_PATH):
+        try:
+            with open(REELS_FILE_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[REELS] Error loading reels_db.json: {e}")
+    return []
+
+STORED_REELS = load_stored_reels()
+
+@app.get("/api/reels")
+def get_reels(
+    page: int = 1,
+    limit: int = 20,
+    category: Optional[str] = None,
+    search: Optional[str] = None
+):
+    """
+    Retrieve diverse, real-world social media Reels with pagination and category filtering.
+    """
+    global STORED_REELS
+    if not STORED_REELS:
+        STORED_REELS = load_stored_reels()
+
+    filtered = STORED_REELS
+    if category and category.strip():
+        cat_lower = category.strip().lower()
+        filtered = [r for r in filtered if r.get("category", "").lower() == cat_lower]
+
+    if search and search.strip():
+        q = search.strip().lower()
+        filtered = [
+            r for r in filtered
+            if q in r.get("caption", "").lower()
+            or q in r.get("user_name", "").lower()
+            or q in r.get("category", "").lower()
+            or q in r.get("topic", "").lower()
+        ]
+
+    total = len(filtered)
+    page_num = max(1, page)
+    limit_num = max(1, min(100, limit))
+    start = (page_num - 1) * limit_num
+    end = start + limit_num
+    paginated_reels = filtered[start:end]
+    total_pages = math.ceil(total / limit_num) if total > 0 else 1
+
+    categories = sorted(list(set(r.get("category", "") for r in STORED_REELS if r.get("category"))))
+
+    return {
+        "success": True,
+        "total": total,
+        "page": page_num,
+        "limit": limit_num,
+        "pages": total_pages,
+        "total_pages": total_pages,
+        "categories": categories,
+        "reels": paginated_reels
+    }
 
 @app.get("/api/comments")
 def get_comments(post_id: str):
