@@ -7,6 +7,30 @@ class TextModerationRequest(BaseModel):
     context: Optional[str] = Field("comment", description="Context of content: comment, post, direct_message, bio")
     user: Optional[str] = Field("anonymous_user", description="Author username or user ID")
 
+class CommentCreateRequest(BaseModel):
+    post_id: str = Field(..., description="Target post or reel identifier")
+    content: str = Field(..., min_length=1, max_length=500, description="Comment body text")
+    user: Optional[str] = Field("anonymous_user", description="Author username")
+
+class CommentModerationDetail(BaseModel):
+    blocked: bool
+    categories: List[str] = []
+
+class CommentSuccessItem(BaseModel):
+    id: str
+    post_id: str
+    user_name: str
+    content: str
+    created_at: str
+    moderation_status: str = "approved"
+
+class CommentResponse(BaseModel):
+    success: bool
+    code: Optional[str] = None
+    message: Optional[str] = None
+    comment: Optional[CommentSuccessItem] = None
+    moderation: Optional[CommentModerationDetail] = None
+
 class ModerationResponse(BaseModel):
     isToxic: bool
     status: str = Field(..., description="ALLOWED or BLOCKED")

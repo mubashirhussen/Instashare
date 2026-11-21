@@ -62,6 +62,18 @@ SUBTYPE_TRANSLATIONS = {
     },
 }
 
+COMMON_STOPWORDS = {
+    "more", "you", "is", "the", "to", "for", "and", "my", "your", "in", "on", "at",
+    "it", "of", "are", "am", "was", "were", "have", "has", "had", "do", "does", "did",
+    "can", "could", "will", "would", "shall", "should", "may", "might", "must", "with",
+    "by", "from", "as", "into", "like", "through", "after", "over", "between", "out",
+    "against", "during", "without", "before", "under", "around", "among", "this", "that",
+    "these", "those", "then", "there", "where", "when", "why", "how", "all", "any",
+    "both", "each", "few", "some", "such", "no", "nor", "not", "only", "own", "same",
+    "so", "than", "too", "very", "just", "now", "tips", "share", "post", "work", "good",
+    "great", "nice", "love", "code", "picture", "photo", "react"
+}
+
 class MultilingualProfanityDetector:
     def __init__(self):
         self.items = []
@@ -78,7 +90,7 @@ class MultilingualProfanityDetector:
 
         clean_text = text.strip()
         lower_text = clean_text.lower()
-        words = re.findall(r"\b\w+\b", lower_text)
+        words = set(re.findall(r"\b\w+\b", lower_text))
 
         matched_item = None
         matched_word = ""
@@ -91,13 +103,26 @@ class MultilingualProfanityDetector:
                 matched_word = it.get("native_script")
                 break
 
-        # 2. Romanized phrase or token match
+        # 2. Romanized phrase match (exact substring or multi-token match excluding common stopwords)
         if not matched_item:
             for it in self.items:
                 roman = (it.get("romanized") or "").strip().lower()
-                if roman and (roman in lower_text or any(w in words for w in roman.split() if len(w) >= 3)):
+                if not roman:
+                    continue
+                # Full phrase exact match
+                if re.search(r"\b" + re.escape(roman) + r"\b", lower_text):
                     matched_item = it
                     matched_word = roman
+                    break
+                # Multi-word phrase token match: require non-stopword tokens to match
+                tokens = [t for t in roman.split() if len(t) >= 3 and t not in COMMON_STOPWORDS]
+                if len(tokens) >= 2 and all(t in words for t in tokens):
+                    matched_item = it
+                    matched_word = roman
+                    break
+                elif len(tokens) == 1 and len(roman.split()) == 1 and tokens[0] in words:
+                    matched_item = it
+                    matched_word = tokens[0]
                     break
 
         # 3. Direct slang regex patterns (e.g. puku, lanja, chutiya, etc.)
@@ -309,3 +334,9 @@ class VideoModerationPipeline:
             "analyzedFrames": analyzed_frames,
             "timestamp": datetime.utcnow().isoformat()
         }
+
+# Global module pipeline singletons
+text_pipeline = TextModerationPipeline()
+image_pipeline = ImageModerationPipeline()
+video_pipeline = VideoModerationPipeline()
+

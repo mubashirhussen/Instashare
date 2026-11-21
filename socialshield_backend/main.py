@@ -1,13 +1,17 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import os
 import shutil
 import uuid
+import html
 from datetime import datetime
 
 from models.schemas import (
     TextModerationRequest,
+    CommentCreateRequest,
+    CommentResponse,
     ModerationResponse,
     VideoModerationResponse,
     ModerationLogSchema,
@@ -104,6 +108,79 @@ def predict_text(request: TextModerationRequest):
 def predict_comment(request: TextModerationRequest):
     request.context = "comment"
     return predict_text(request)
+
+@app.post("/api/comments")
+def create_comment(request: CommentCreateRequest):
+    cleaned = (request.content or "").strip()
+    if not cleaned:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "success": False,
+                "code": "EMPTY_COMMENT",
+                "message": "Comment cannot be empty."
+            }
+        )
+
+    if len(cleaned) > 500:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "success": False,
+                "code": "COMMENT_TOO_LONG",
+                "message": "Comment exceeds maximum limit of 500 characters."
+            }
+        )
+
+    # Evaluate comment content against moderation pipeline
+    result = text_pipeline.predict(cleaned, context="comment")
+
+    if result.get("isToxic"):
+        # Log moderation violation internally without exposing to public feed
+        log_entry = {
+            "id": f"mod_{uuid.uuid4().hex[:8]}",
+            "contentType": "comment",
+            "context": "comment",
+            "contentSample": cleaned[:80] + "..." if len(cleaned) > 80 else cleaned,
+            "fullContent": cleaned,
+            "author": request.user or "anonymous",
+            "status": "BLOCKED",
+            "isToxic": True,
+            "toxicityScore": result.get("toxicityScore", 0.92),
+            "confidence": result.get("confidence", "92.0%"),
+            "categories": result.get("categories", ["Profanity"]),
+            "reason": result.get("reason", "Violated platform safety guidelines."),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        MODERATION_LOGS.insert(0, log_entry)
+
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={
+                "success": False,
+                "code": "COMMENT_MODERATION_REJECTED",
+                "message": "Your comment contains inappropriate or unparliamentary language. Please edit your comment and try again.",
+                "moderation": {
+                    "blocked": True,
+                    "categories": result.get("categories", [])
+                }
+            }
+        )
+
+    # Approved comment
+    new_comment = {
+        "id": f"c_{uuid.uuid4().hex[:8]}",
+        "post_id": request.post_id,
+        "user_name": request.user or "mubashir_hussen.sk",
+        "content": cleaned,
+        "created_at": datetime.utcnow().isoformat(),
+        "moderation_status": "approved"
+    }
+
+    return {
+        "success": True,
+        "comment": new_comment
+    }
 
 @app.post("/predict/image", response_model=ModerationResponse)
 async def predict_image(file: UploadFile = File(...), user: Optional[str] = Form("anonymous")):

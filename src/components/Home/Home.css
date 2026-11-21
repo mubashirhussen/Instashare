@@ -540,6 +540,51 @@
   color: #00376b;
 }
 
+.post-comment-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inline Comment Moderation Error (Phase 3 Clean Inline UX) */
+.add-comment-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inline-comment-moderation-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: rgba(237, 73, 86, 0.08);
+  border: 1px solid rgba(237, 73, 86, 0.28);
+  border-radius: 6px;
+  color: #c92a37;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+  animation: inlineErrorFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inline-comment-moderation-error .inline-error-icon {
+  flex-shrink: 0;
+  color: #ed4956;
+  margin-top: 2px;
+}
+
+@keyframes inlineErrorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Responsive */
 @media (max-width: 576px) {
   .instagram-feed-main {

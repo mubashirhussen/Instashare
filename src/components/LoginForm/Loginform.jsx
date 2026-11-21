@@ -162,7 +162,7 @@ const LoginForm = () => {
                     className="login-input"
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
-                    placeholder="Mubashir Hussen"
+                    placeholder="Full Name"
                     required
                   />
                 </div>
@@ -177,7 +177,7 @@ const LoginForm = () => {
                     className="login-input"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="alex@example.com"
+                    placeholder="Email"
                   />
                 </div>
               </>
@@ -193,7 +193,7 @@ const LoginForm = () => {
                 className="login-input"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder={isSignUp ? 'mubashir_hussen.sk' : 'Username (e.g. rahul)'}
+                placeholder={isSignUp ? 'username' : 'Username (e.g. rahul)'}
                 required
               />
             </div>
@@ -224,7 +224,7 @@ const LoginForm = () => {
                   className="login-input"
                   value={avatarUrl}
                   onChange={e => setAvatarUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
+                  placeholder="URL"
                 />
               </div>
             )}

@@ -658,6 +658,40 @@
   opacity: 0.8;
 }
 
+.comment-post-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Inline Comment Moderation Error (Reels Dark Mode) */
+.reel-dark-comment-form-wrap {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inline-comment-moderation-error.reel-inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 59, 92, 0.12);
+  border: 1px solid rgba(255, 59, 92, 0.38);
+  border-radius: 6px;
+  color: #ff6b81;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+  animation: inlineErrorFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inline-comment-moderation-error.reel-inline-error .inline-error-icon {
+  flex-shrink: 0;
+  color: #ff4d6d;
+  margin-top: 2px;
+}
+
 /* Responsive Grid Breakpoints */
 @media (max-width: 1280px) {
   .side-by-side-reels-grid-5 {

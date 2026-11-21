@@ -11,14 +11,14 @@ import {
   BsArrowRepeat,
   BsPlayFill,
   BsPauseFill,
+  BsExclamationTriangleFill,
 } from 'react-icons/bs'
 import { FiSend, FiVolume2, FiVolumeX } from 'react-icons/fi'
 import { ThreeDots } from 'react-loader-spinner'
 import Header from '../Header'
 import UserStories from '../UserStories'
 import FailureView from '../FailureView'
-import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
-import { moderateText } from '../../services/socialShieldAI'
+import { submitComment } from '../../services/commentService'
 import { getCustomFeedPosts, getUserProfile } from '../../utils/storage'
 import './Home.css'
 
@@ -351,27 +351,44 @@ export const PostCard = ({ post, onClickUser }) => {
     }
   }
 
-  const [shieldAlert, setShieldAlert] = useState(null)
+  const [commentError, setCommentError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleAddComment = async e => {
     e.preventDefault()
     const trimmed = commentText.trim()
-    if (!trimmed) return
+    if (!trimmed || isSubmitting) return
 
-    // 🛡️ SocialShield AI Real-Time Toxic Content Interception
-    const modResult = await moderateText(trimmed, 'comment', 'mubashir_hussen.sk')
-    if (modResult.isToxic) {
-      setShieldAlert(modResult)
-      return
-    }
-
+    setIsSubmitting(true)
     const currentUser = getUserProfile()
-    const newCommentObj = {
-      user_name: currentUser.username || 'mubashir_hussen.sk',
-      comment: trimmed,
+    const author = currentUser.username || 'mubashir_hussen.sk'
+
+    try {
+      const result = await submitComment({
+        postId: post.post_id,
+        text: trimmed,
+        author,
+        context: 'comment',
+      })
+
+      if (!result.success) {
+        setCommentError(result.message)
+        return
+      }
+
+      // Approved comment
+      setCommentError(null)
+      setCommentText('')
+      const newCommentObj = {
+        user_name: author,
+        comment: trimmed,
+      }
+      setCommentsList(prev => [...prev, newCommentObj])
+    } catch {
+      setCommentError('Unable to post your comment right now. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
-    setCommentsList(prev => [...prev, newCommentObj])
-    setCommentText('')
   }
 
   const handleShareClick = () => {
@@ -579,29 +596,48 @@ export const PostCard = ({ post, onClickUser }) => {
 
         {/* Comment Input */}
         {showCommentInput && (
-          <form className="add-comment-form" onSubmit={handleAddComment}>
-            <input
-              type="text"
-              placeholder="Add a comment..."
-              value={commentText}
-              onChange={e => setCommentText(e.target.value)}
-              className="add-comment-input"
-            />
-            {commentText.trim() && (
-              <button type="submit" className="post-comment-btn">
-                Post
-              </button>
+          <div className="add-comment-wrapper">
+            <form className="add-comment-form" onSubmit={handleAddComment}>
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                value={commentText}
+                onChange={e => {
+                  setCommentText(e.target.value)
+                  if (commentError) setCommentError(null)
+                }}
+                className="add-comment-input"
+                disabled={isSubmitting}
+                aria-label="Add a comment"
+              />
+              {commentText.trim() && (
+                <button
+                  type="submit"
+                  className="post-comment-btn"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Posting...' : 'Post'}
+                </button>
+              )}
+            </form>
+
+            {commentError && (
+              <div
+                className="inline-comment-moderation-error"
+                role="alert"
+                aria-live="polite"
+              >
+                <BsExclamationTriangleFill
+                  className="inline-error-icon"
+                  size={13}
+                  aria-hidden="true"
+                />
+                <span>{commentError}</span>
+              </div>
             )}
-          </form>
+          </div>
         )}
       </div>
-
-      {shieldAlert && (
-        <SocialShieldAlert
-          blockResult={shieldAlert}
-          onClose={() => setShieldAlert(null)}
-        />
-      )}
     </article>
   )
 }

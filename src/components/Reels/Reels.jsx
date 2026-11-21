@@ -16,11 +16,11 @@ import {
   BsInstagram,
   BsEmojiSmile,
   BsX,
+  BsExclamationTriangleFill,
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
 import Header from '../Header'
-import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
-import { moderateText } from '../../services/socialShieldAI'
+import { submitComment } from '../../services/commentService'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
 
@@ -547,7 +547,8 @@ const Reels = () => {
   const [modalFollowing, setModalFollowing] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [modalComments, setModalComments] = useState([])
-  const [shieldAlert, setShieldAlert] = useState(null)
+  const [commentError, setCommentError] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
   const modalVideoRef = useRef(null)
 
@@ -571,6 +572,8 @@ const Reels = () => {
     setModalSaved(false)
     setModalFollowing(false)
     setCommentText('')
+    setCommentError(null)
+    setIsSubmitting(false)
     setModalComments([
       {
         id: 'c1',
@@ -602,25 +605,40 @@ const Reels = () => {
   const handleAddComment = async e => {
     e.preventDefault()
     const trimmed = commentText.trim()
-    if (!trimmed) return
+    if (!trimmed || isSubmitting) return
 
-    // 🛡️ SocialShield AI Real-Time Toxic Content Interception
-    const modResult = await moderateText(trimmed, 'reel_comment', 'mubashir_hussen.sk')
-    if (modResult.isToxic) {
-      setShieldAlert(modResult)
-      return
-    }
+    setIsSubmitting(true)
 
-    const newC = {
-      id: `c_${Date.now()}`,
-      username: 'mubashir_hussen.sk',
-      avatar: '/profile_avatar.jpg',
-      text: trimmed,
-      time: 'Just now',
-      likes: 0,
+    try {
+      const result = await submitComment({
+        postId: selectedReelModal?.id || 'reel',
+        text: trimmed,
+        author: 'mubashir_hussen.sk',
+        context: 'reel_comment',
+      })
+
+      if (!result.success) {
+        setCommentError(result.message)
+        return
+      }
+
+      // Approved comment
+      setCommentError(null)
+      setCommentText('')
+      const newC = {
+        id: `c_${Date.now()}`,
+        username: 'mubashir_hussen.sk',
+        avatar: '/profile_avatar.jpg',
+        text: trimmed,
+        time: 'Just now',
+        likes: 0,
+      }
+      setModalComments(prev => [...prev, newC])
+    } catch {
+      setCommentError('Unable to post your comment right now. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
-    setModalComments(prev => [...prev, newC])
-    setCommentText('')
   }
 
   const loadReels = () => {
@@ -914,35 +932,54 @@ const Reels = () => {
                   )}
 
                   {/* 4. Add a comment input form */}
-                  <form className="reel-dark-add-comment-form" onSubmit={handleAddComment}>
-                    <button type="button" className="comment-emoji-btn" aria-label="Insert Emoji">
-                      <BsEmojiSmile size={20} />
-                    </button>
-                    <input
-                      type="text"
-                      className="comment-text-input"
-                      placeholder="Add a comment..."
-                      value={commentText}
-                      onChange={e => setCommentText(e.target.value)}
-                    />
-                    {commentText.trim() && (
-                      <button type="submit" className="comment-post-btn">
-                        Post
+                  <div className="reel-dark-comment-form-wrap">
+                    <form className="reel-dark-add-comment-form" onSubmit={handleAddComment}>
+                      <button type="button" className="comment-emoji-btn" aria-label="Insert Emoji">
+                        <BsEmojiSmile size={20} />
                       </button>
+                      <input
+                        type="text"
+                        className="comment-text-input"
+                        placeholder="Add a comment..."
+                        value={commentText}
+                        onChange={e => {
+                          setCommentText(e.target.value)
+                          if (commentError) setCommentError(null)
+                        }}
+                        disabled={isSubmitting}
+                        aria-label="Add a comment"
+                      />
+                      {commentText.trim() && (
+                        <button
+                          type="submit"
+                          className="comment-post-btn"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'Posting...' : 'Post'}
+                        </button>
+                      )}
+                    </form>
+
+                    {commentError && (
+                      <div
+                        className="inline-comment-moderation-error reel-inline-error"
+                        role="alert"
+                        aria-live="polite"
+                      >
+                        <BsExclamationTriangleFill
+                          className="inline-error-icon"
+                          size={13}
+                          aria-hidden="true"
+                        />
+                        <span>{commentError}</span>
+                      </div>
                     )}
-                  </form>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      )}
-
-      {shieldAlert && (
-        <SocialShieldAlert
-          blockResult={shieldAlert}
-          onClose={() => setShieldAlert(null)}
-        />
       )}
     </div>
   )

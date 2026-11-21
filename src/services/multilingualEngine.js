@@ -166,12 +166,24 @@ const SUBTYPE_TRANSLATIONS = {
   },
 }
 
+const COMMON_STOPWORDS = new Set([
+  'more', 'you', 'is', 'the', 'to', 'for', 'and', 'my', 'your', 'in', 'on', 'at',
+  'it', 'of', 'are', 'am', 'was', 'were', 'have', 'has', 'had', 'do', 'does', 'did',
+  'can', 'could', 'will', 'would', 'shall', 'should', 'may', 'might', 'must', 'with',
+  'by', 'from', 'as', 'into', 'like', 'through', 'after', 'over', 'between', 'out',
+  'against', 'during', 'without', 'before', 'under', 'around', 'among', 'this', 'that',
+  'these', 'those', 'then', 'there', 'where', 'when', 'why', 'how', 'all', 'any',
+  'both', 'each', 'few', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same',
+  'so', 'than', 'too', 'very', 'just', 'now', 'tips', 'share', 'post', 'work', 'good',
+  'great', 'nice', 'love', 'code', 'picture', 'photo', 'react', 'see', 'look'
+])
+
 // Build pre-compiled fast lookups
 const indexedData = []
 for (const item of datasetItems) {
   const native = (item.native_script || '').trim().toLowerCase()
   const roman = (item.romanized || '').trim().toLowerCase()
-  const tokens = roman ? roman.split(/\s+/).filter(t => t.length >= 3) : []
+  const tokens = roman ? roman.split(/\s+/).filter(t => t.length >= 3 && !COMMON_STOPWORDS.has(t)) : []
 
   indexedData.push({
     ...item,
@@ -240,7 +252,7 @@ export const detectMultilingualProfanity = text => {
   // 4. Token & Phonetic Matching (e.g. 'lanja koduku', 'puku', 'chutiya', 'soole', 'thevidiya')
   if (!bestMatch) {
     for (const word of words) {
-      if (word.length < 3) continue
+      if (word.length < 3 || COMMON_STOPWORDS.has(word)) continue
       const synonyms = PHONETIC_SYNONYMS[word] || [word]
 
       for (const syn of synonyms) {
