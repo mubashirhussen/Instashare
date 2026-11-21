@@ -21,7 +21,7 @@ export const DEFAULT_USER_PROFILE = {
     {
       id: 'p_2',
       image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+      videoUrl: '/videos/sample_reel_1.mp4',
       isVideo: true,
       likes: 3580,
       comments: 112,
@@ -40,7 +40,7 @@ export const DEFAULT_USER_PROFILE = {
     {
       id: 'p_4',
       image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+      videoUrl: '/videos/sample_reel_2.mp4',
       isVideo: true,
       likes: 4120,
       comments: 156,
@@ -70,7 +70,7 @@ export const DEFAULT_USER_PROFILE = {
     {
       id: 'r_1',
       thumbnail: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+      videoUrl: '/videos/sample_reel_1.mp4',
       views: '124K',
       likes: 3580,
       caption: 'Winding Mountain Roads Cinematic 4K',
@@ -78,7 +78,7 @@ export const DEFAULT_USER_PROFILE = {
     {
       id: 'r_2',
       thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+      videoUrl: '/videos/sample_reel_2.mp4',
       views: '89.5K',
       likes: 4120,
       caption: '10x Engineering Workflow Tricks',
@@ -86,7 +86,7 @@ export const DEFAULT_USER_PROFILE = {
     {
       id: 'r_3',
       thumbnail: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&auto=format&fit=crop',
-      videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4',
+      videoUrl: '/videos/tech_reel_1.mp4',
       views: '210K',
       likes: 5410,
       caption: 'Sunset drone loop relaxation',

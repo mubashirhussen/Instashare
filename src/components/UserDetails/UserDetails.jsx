@@ -123,7 +123,7 @@ const UserDetails = () => {
             {
               id: 'r_fetched_1',
               thumbnail: fetched.posts?.[0]?.image || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop',
-              videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+              videoUrl: '/videos/sample_reel_1.mp4',
               views: '45.2K',
               likes: 1240,
               caption: 'Cinematic perspectives',

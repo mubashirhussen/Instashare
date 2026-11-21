@@ -1,6 +1,6 @@
 /**
  * Comment Submission & Moderation Pipeline Service
- * Enforces pre-publish moderation, input sanitization, and structured responses
+ * Enforces pre-publish moderation, authentic original text preservation, and persistence
  */
 import { checkTextToxicityLocal, saveModerationLog } from './socialShieldAI'
 
@@ -10,10 +10,61 @@ const USER_FRIENDLY_MODERATION_ERROR =
   'Your comment contains inappropriate or unparliamentary language. Please edit your comment and try again.'
 
 /**
- * Submits and moderates a comment in real-time
+ * Retrieves persisted authentic comments for a post or reel.
+ * Queries backend first; falls back to synchronized localStorage store.
+ * @param {string} postId - Post or reel ID
+ * @returns {Promise<{ success: boolean, comments: Array<Object> }>}
+ */
+export const fetchComments = async (postId) => {
+  const localKey = `instashare_comments_${postId}`
+  let localComments = []
+  try {
+    const raw = localStorage.getItem(localKey)
+    if (raw) {
+      localComments = JSON.parse(raw)
+    }
+  } catch {
+    localComments = []
+  }
+
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 1800)
+
+    const response = await fetch(`${BACKEND_API_BASE}/api/comments?post_id=${encodeURIComponent(postId)}`, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
+    if (response.ok) {
+      const data = await response.json()
+      if (Array.isArray(data.comments) && data.comments.length > 0) {
+        // Map backend comments to standard client comment format
+        const formatted = data.comments.map(c => ({
+          id: c.id,
+          username: c.user_name || 'user',
+          avatar: c.avatar || '/profile_avatar.jpg',
+          text: c.content || c.comment || '',
+          time: c.created_at ? 'Recently' : 'Just now',
+          likes: c.likes || 0,
+        }))
+        localStorage.setItem(localKey, JSON.stringify(formatted))
+        return { success: true, comments: formatted }
+      }
+    }
+  } catch {
+    // If backend is unreachable, rely on local cached comments
+  }
+
+  return { success: true, comments: localComments }
+}
+
+/**
+ * Submits and moderates a comment in real-time.
+ * Guarantees original user-written text is submitted verbatim without AI rewriting.
  * @param {Object} params
  * @param {string} params.postId - Post or reel ID
- * @param {string} params.text - User comment text
+ * @param {string} params.text - Original user comment text
  * @param {string} params.author - Username of commenter
  * @param {string} [params.context='comment'] - Comment context ('comment' | 'reel_comment')
  * @returns {Promise<{ success: boolean, code?: string, message?: string, comment?: Object, moderation?: Object }>}
@@ -74,6 +125,7 @@ export const submitComment = async ({
   }
 
   // 3. Backend Verification & Persistence Gateway
+  let savedCommentItem = null
   try {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 1800)
@@ -102,33 +154,36 @@ export const submitComment = async ({
 
     if (response.ok) {
       const data = await response.json()
-      return {
-        success: true,
-        comment: data.comment || {
-          id: `c_${Date.now()}`,
-          post_id: postId,
-          user_name: author,
-          comment: trimmed,
-          created_at: new Date().toISOString(),
-          moderation_status: 'approved',
-        },
-      }
+      savedCommentItem = data.comment
     }
   } catch {
     // If backend is unreachable or timed out, and local evaluation verified safe:
     // Safely allow approved local comment
   }
 
+  const clientComment = {
+    id: savedCommentItem?.id || `c_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+    username: author,
+    avatar: '/profile_avatar.jpg',
+    text: trimmed, // Exact user-submitted text preserved verbatim
+    time: 'Just now',
+    likes: 0,
+    created_at: savedCommentItem?.created_at || new Date().toISOString(),
+    moderation_status: 'approved',
+  }
+
+  // Synchronize to localStorage for offline persistence
+  try {
+    const localKey = `instashare_comments_${postId}`
+    const existing = JSON.parse(localStorage.getItem(localKey) || '[]')
+    localStorage.setItem(localKey, JSON.stringify([...existing, clientComment]))
+  } catch {
+    // LocalStorage quota or parsing fallback
+  }
+
   // Safe Approved Outcome
   return {
     success: true,
-    comment: {
-      id: `c_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      post_id: postId,
-      user_name: author,
-      comment: trimmed,
-      created_at: new Date().toISOString(),
-      moderation_status: 'approved',
-    },
+    comment: clientComment,
   }
 }

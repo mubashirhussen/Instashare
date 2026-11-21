@@ -1,0 +1,62 @@
+{
+  "test_reel_playback": [
+    {
+      "id": "c_test_reel_playback_1",
+      "post_id": "test_reel_playback",
+      "user_name": "pawavarma795",
+      "content": "🙌 🔥 Great explanation on loops and syntax!",
+      "created_at": "2026-10-15T12:00:00Z",
+      "moderation_status": "approved"
+    },
+    {
+      "id": "c_test_reel_playback_2",
+      "post_id": "test_reel_playback",
+      "user_name": "dribspyetrocrown",
+      "content": "😍 🔥 🔥 Bookmarked for my upcoming technical interview prep!",
+      "created_at": "2026-10-18T15:30:00Z",
+      "moderation_status": "approved"
+    },
+    {
+      "id": "c_test_reel_playback_3",
+      "post_id": "test_reel_playback",
+      "user_name": "tech_explorer",
+      "content": "Clean and concise. Thank you for breaking down the concepts so well! 👏",
+      "created_at": "2026-10-24T09:15:00Z",
+      "moderation_status": "approved"
+    }
+  ],
+  "post_1": [
+    {
+      "id": "c_b4826b41",
+      "post_id": "post_1",
+      "user_name": "mubashir",
+      "content": "Beautiful picture!",
+      "created_at": "2026-11-21T06:43:22.263767",
+      "moderation_status": "approved"
+    },
+    {
+      "id": "c_3a201f88",
+      "post_id": "post_1",
+      "user_name": "mubashir",
+      "content": "I really like this post.",
+      "created_at": "2026-11-21T06:43:22.294769",
+      "moderation_status": "approved"
+    },
+    {
+      "id": "c_908f83be",
+      "post_id": "post_1",
+      "user_name": "mubashir",
+      "content": "Great work on this tutorial!",
+      "created_at": "2026-11-21T06:43:22.324336",
+      "moderation_status": "approved"
+    },
+    {
+      "id": "c_168c37dc",
+      "post_id": "post_1",
+      "user_name": "mubashir",
+      "content": "Could you share more tips on React performance?",
+      "created_at": "2026-11-21T06:43:22.357330",
+      "moderation_status": "approved"
+    }
+  ]
+}

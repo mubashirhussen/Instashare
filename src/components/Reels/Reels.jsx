@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   BsPlayFill,
+  BsPauseFill,
   BsHeartFill,
   BsHeart,
   BsChatFill,
@@ -17,10 +18,13 @@ import {
   BsEmojiSmile,
   BsX,
   BsExclamationTriangleFill,
+  BsFullscreen,
+  BsFullscreenExit,
+  BsArrowClockwise,
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
 import Header from '../Header'
-import { submitComment } from '../../services/commentService'
+import { submitComment, fetchComments } from '../../services/commentService'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
 
@@ -35,7 +39,7 @@ const LEARNING_REELS_LIST = [
     topic: 'React 19 Actions',
     tag: '⚛️ React 19',
     post_link: 'https://www.instagram.com/reel/Ddvzl8agg72/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'React 19 Actions & useActionState hook in 45 seconds! Simplify async form handling & optimistic UI ⚡ #React #WebDev #JavaScript',
     audio_info: 'react_mastery • Code Flow',
     views: '284K',
@@ -51,7 +55,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Python Tricks',
     tag: '🐍 Python',
     post_link: 'https://www.instagram.com/reel/DdtVeIohU3c/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-computer-technology-42984-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'Top 5 Python One-Liners that make you look like a Senior Engineer 🚀 List comprehensions & Walrus operator!',
     audio_info: 'pycode.dev • Python Beats',
     views: '390K',
@@ -67,7 +71,7 @@ const LEARNING_REELS_LIST = [
     topic: 'DSA Stack LIFO',
     tag: '☕ Java & DSA',
     post_link: 'https://www.instagram.com/reel/Dc5gD-FSsf8/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Reverse String with Stack LIFO Logic 🔥 Day 17 DSA Challenge! Time O(N) | Space O(N) #Java #DSA #TeluguCoding',
     audio_info: 'codenloop • Trending Tech',
     views: '195K',
@@ -83,7 +87,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Redis Caching',
     tag: '🏗️ Architecture',
     post_link: 'https://www.instagram.com/reel/DYjzhs5pbSS/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1188-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Redis In-Memory Caching Strategies (Cache-Aside, Write-Through, Write-Back) for Ultra High Throughput ⚡💾',
     audio_info: 'system_design_101 • Deep Focus',
     views: '320K',
@@ -99,7 +103,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Node Event Loop',
     tag: '⚡ Node.js',
     post_link: 'https://www.instagram.com/reel/DdjHGWNIe3A/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'How the Node.js Event Loop works under the hood 🌐 Microtasks, Timers, and I/O polling simplified!',
     audio_info: 'nodejs_backend • Backend Focus',
     views: '178K',
@@ -115,7 +119,7 @@ const LEARNING_REELS_LIST = [
     topic: 'CSS Grid',
     tag: '🎨 UI/UX',
     post_link: 'https://www.instagram.com/reel/DcyQ3gZoAzm/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-mother-and-daughter-looking-at-the-sunset-41589-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'One-line responsive layout superpower: grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))! ✨',
     audio_info: 'css_wizard • UI Magic',
     views: '260K',
@@ -131,7 +135,7 @@ const LEARNING_REELS_LIST = [
     topic: 'TypeScript Generics',
     tag: '📘 TypeScript',
     post_link: 'https://www.instagram.com/p/DcD0l_RTlIU/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Master TypeScript Generics in 60s! Create reusable, strictly type-safe API wrappers effortlessly 🛡️',
     audio_info: 'typescript_pro • Type Flow',
     views: '145K',
@@ -147,7 +151,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Docker Builds',
     tag: '🐳 DevOps',
     post_link: 'https://www.instagram.com/reel/DaNjIVrJs0o/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Multi-stage Docker builds: Shrink your Node/React production image from 1.2GB to under 50MB 🚀📦',
     audio_info: 'docker_devops • Cloud Audio',
     views: '210K',
@@ -163,7 +167,7 @@ const LEARNING_REELS_LIST = [
     topic: 'PostgreSQL vs MongoDB',
     tag: '🗄️ Database',
     post_link: 'https://www.instagram.com/reel/DdghvalJ9jK/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-computer-technology-42984-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'When to choose PostgreSQL vs MongoDB? ACID transactions vs flexible JSON schemas explained clearly! 📊🍃',
     audio_info: 'database_hub • Data Beats',
     views: '185K',
@@ -179,7 +183,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Next.js 15 Actions',
     tag: '⚛️ Frontend',
     post_link: 'https://www.instagram.com/reel/DdjU5NlpUW2/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-mother-and-daughter-looking-at-the-sunset-41589-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'Next.js 15 Server Actions vs API Routes: When should you use which? Real-time mutations made easy! 🚀',
     audio_info: 'nextjs_daily • Next Vibe',
     views: '290K',
@@ -195,7 +199,7 @@ const LEARNING_REELS_LIST = [
     topic: 'AI Agents',
     tag: '🤖 AI/ML',
     post_link: 'https://www.instagram.com/reel/DdqA1K5MrN5/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-computer-technology-42984-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Building Autonomous AI coding agents with function calling and tool execution loops 🤖💡 #AI #Python',
     audio_info: 'ai_engineers • Future AI',
     views: '450K',
@@ -211,7 +215,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Binary Search',
     tag: '📚 Algorithms',
     post_link: 'https://www.instagram.com/reel/DcgN_TrBjl-/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Binary Search step-by-step pointer visualization! Halving search space for O(log N) speed ⚡ #LeetCode',
     audio_info: 'dsa_visualizer • Logic Sound',
     views: '340K',
@@ -227,7 +231,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Express JWT',
     tag: '⚡ Backend',
     post_link: 'https://www.instagram.com/reel/DdoXO15t553/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1188-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'JWT Authentication middleware in Express.js: Protect protected routes with verifyToken in 5 lines 🔐🛡️',
     audio_info: 'express_apis • Security Beat',
     views: '165K',
@@ -243,7 +247,7 @@ const LEARNING_REELS_LIST = [
     topic: 'GraphQL vs REST',
     tag: '🌐 API Design',
     post_link: 'https://www.instagram.com/reel/DdoQpWyIpwQ/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'GraphQL vs REST: Eliminate over-fetching and under-fetching with single declarative query schemas 📡✨',
     audio_info: 'graphql_guide • GraphQL Pulse',
     views: '150K',
@@ -259,7 +263,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Go Goroutines',
     tag: '🐹 Golang',
     post_link: 'https://www.instagram.com/reel/Ddlr3nZzLwl/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-sky-in-a-sunset-26070-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Go Goroutines & Channels: Lightweight concurrent programming with zero thread overhead ⚡🐹',
     audio_info: 'golang_channel • Go Rhythms',
     views: '205K',
@@ -275,7 +279,7 @@ const LEARNING_REELS_LIST = [
     topic: 'SOLID Principles',
     tag: '📐 Architecture',
     post_link: 'https://www.instagram.com/reel/DdiUx_kT6GK/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1188-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Single Responsibility & Dependency Inversion in React and Node: Write testable, decouple code 💡✨',
     audio_info: 'clean_coder • Ambient Focus',
     views: '230K',
@@ -291,7 +295,7 @@ const LEARNING_REELS_LIST = [
     topic: 'WebSockets',
     tag: '💬 Realtime',
     post_link: 'https://www.instagram.com/reel/Dds5p5sybc3/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'Bidirectional full-duplex communication with Socket.io & ws: Build instant real-time apps 💬🔔',
     audio_info: 'websocket_realtime • Realtime Pulse',
     views: '275K',
@@ -307,7 +311,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Fullstack 2026',
     tag: '🚀 Career',
     post_link: 'https://www.instagram.com/reel/Ddty13cB_mm/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-computer-technology-42984-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'The Ultimate 2026 Full Stack Developer Roadmap: React, Node, Cloud, AI & System Architecture 🗺️✨',
     audio_info: 'fullstack_roadmap • Inspiration',
     views: '520K',
@@ -323,7 +327,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Git Workflow',
     tag: '🔧 DevOps',
     post_link: 'https://www.instagram.com/p/git_rebase/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Git Interactive Rebase (git rebase -i HEAD~N): Squash messy commits into clean history like a pro! 🧹💻',
     audio_info: 'git_hacks • Clean Code',
     views: '158K',
@@ -339,7 +343,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Tailwind CSS',
     tag: '🎨 UI/UX',
     post_link: 'https://www.instagram.com/p/tailwind_tips/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-mother-and-daughter-looking-at-the-sunset-41589-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Custom Tailwind plugins, CSS variables, and dark mode transitions in under 60 seconds 🎨⚡',
     audio_info: 'tailwind_ninja • Synthwave',
     views: '205K',
@@ -355,7 +359,7 @@ const LEARNING_REELS_LIST = [
     topic: 'FastAPI',
     tag: '🐍 Python',
     post_link: 'https://www.instagram.com/p/fastapi_tips/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-hands-typing-on-a-laptop-42998-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'Why FastAPI is the highest performance Python backend framework: Async Pydantic validation & Auto Docs ⚡',
     audio_info: 'fastapi_python • Python Tech',
     views: '230K',
@@ -371,7 +375,7 @@ const LEARNING_REELS_LIST = [
     topic: 'MongoDB Pipeline',
     tag: '🗄️ Database',
     post_link: 'https://www.instagram.com/p/mongodb_pipeline/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-vertical-aerial-view-of-a-winding-road-in-the-middle-41584-large.mp4',
+    video_url: '/videos/sample_reel_2.mp4',
     caption: 'MongoDB Aggregation Pipeline ($match, $group, $lookup, $project) explained visually in 1 minute 🍃📊',
     audio_info: 'mongodb_masters • DB Sound',
     views: '185K',
@@ -387,7 +391,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Binary Trees',
     tag: '📚 Algorithms',
     post_link: 'https://www.instagram.com/p/binary_trees/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-branches-in-the-breeze-1188-large.mp4',
+    video_url: '/videos/tech_reel_1.mp4',
     caption: 'Inorder, Preorder, and Postorder DFS Tree Traversals animated simply! Ace your FAANG interviews 🌳💻',
     audio_info: 'dsa_trees • Code Rhythms',
     views: '260K',
@@ -403,7 +407,7 @@ const LEARNING_REELS_LIST = [
     topic: 'Cybersecurity',
     tag: '🛡️ Security',
     post_link: 'https://www.instagram.com/p/web_security/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-mother-and-daughter-looking-at-the-sunset-41589-large.mp4',
+    video_url: '/videos/tech_reel_2.mp4',
     caption: 'Preventing XSS, CSRF, and SQL Injection attacks in modern full stack web applications 🛡️🔒',
     audio_info: 'web_security • Cyber Beat',
     views: '215K',
@@ -419,7 +423,7 @@ const LEARNING_REELS_LIST = [
     topic: 'NextGen AI',
     tag: '🤖 AI Academy',
     post_link: 'https://www.instagram.com/p/nextgen_ai/',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-circuit-board-microchip-computer-technology-42984-large.mp4',
+    video_url: '/videos/sample_reel_1.mp4',
     caption: 'Junior writes 10 lines... Senior writes 1 line. Explore how AI pipelines transform messy data workflows effortlessly 🧠⚡',
     audio_info: 'nextgendataaiacademy • AI Pulse',
     views: '380K',
@@ -471,6 +475,12 @@ const ReelGridCard = ({ reel, onClickCard }) => {
           loop
           autoPlay
           muted={isMuted}
+          onError={() => {
+            if (videoRef.current && !videoRef.current.src.endsWith('/videos/sample_reel_1.mp4')) {
+              videoRef.current.src = '/videos/sample_reel_1.mp4';
+              videoRef.current.load();
+            }
+          }}
         />
 
         {/* Audio Toggle */}
@@ -547,23 +557,72 @@ const Reels = () => {
   const [modalFollowing, setModalFollowing] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [modalComments, setModalComments] = useState([])
+  const [commentsLoading, setCommentsLoading] = useState(false)
   const [commentError, setCommentError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
+
+  // Advanced Native Video Player States
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [volume, setVolume] = useState(1)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isBuffering, setIsBuffering] = useState(false)
+  const [videoError, setVideoError] = useState(false)
+
   const modalVideoRef = useRef(null)
+  const modalPaneRef = useRef(null)
+
+  const formatTime = seconds => {
+    if (!seconds || isNaN(seconds)) return '0:00'
+    const mins = Math.floor(seconds / 60)
+    const secs = Math.floor(seconds % 60)
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+  }
 
   const toggleModalPlay = () => {
     if (!modalVideoRef.current) return
     if (modalVideoRef.current.paused) {
-      modalVideoRef.current.play()
-      setModalPlaying(true)
+      modalVideoRef.current.play().then(() => setModalPlaying(true)).catch(() => {})
     } else {
       modalVideoRef.current.pause()
       setModalPlaying(false)
     }
   }
 
-  const handleOpenReel = reel => {
+  const handleSeek = e => {
+    const newTime = parseFloat(e.target.value)
+    setCurrentTime(newTime)
+    if (modalVideoRef.current) {
+      modalVideoRef.current.currentTime = newTime
+    }
+  }
+
+  const handleVolumeChange = e => {
+    const newVol = parseFloat(e.target.value)
+    setVolume(newVol)
+    if (modalVideoRef.current) {
+      modalVideoRef.current.volume = newVol
+      if (newVol === 0) {
+        modalVideoRef.current.muted = true
+        setModalMuted(true)
+      } else {
+        modalVideoRef.current.muted = false
+        setModalMuted(false)
+      }
+    }
+  }
+
+  const toggleFullscreen = () => {
+    if (!modalPaneRef.current) return
+    if (!document.fullscreenElement) {
+      modalPaneRef.current.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {})
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {})
+    }
+  }
+
+  const handleOpenReel = async reel => {
     setSelectedReelModal(reel)
     setModalPlaying(true)
     setModalMuted(false)
@@ -574,32 +633,51 @@ const Reels = () => {
     setCommentText('')
     setCommentError(null)
     setIsSubmitting(false)
-    setModalComments([
-      {
-        id: 'c1',
-        username: 'pawavarma795',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
-        text: '🙌 🔥 Great explanation on loops and syntax!',
-        time: '5w',
-        likes: 1,
-      },
-      {
-        id: 'c2',
-        username: 'dribspyetrocrown',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
-        text: '😍 🔥 🔥 Bookmarked for my upcoming technical interview prep!',
-        time: '5w',
-        likes: 3,
-      },
-      {
-        id: 'c3',
-        username: 'tech_explorer',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
-        text: 'Clean and concise. Thank you for breaking down the concepts so well! 👏',
-        time: '3w',
-        likes: 2,
-      },
-    ])
+    setCurrentTime(0)
+    setDuration(0)
+    setVideoError(false)
+    setIsBuffering(false)
+    setCommentsLoading(true)
+
+    // Load authentic stored comments for this specific reel from backend/localStorage
+    try {
+      const res = await fetchComments(reel.id)
+      if (res && Array.isArray(res.comments) && res.comments.length > 0) {
+        setModalComments(res.comments)
+      } else {
+        const initialSeed = [
+          {
+            id: `${reel.id}_c1`,
+            username: 'pawavarma795',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100',
+            text: '🙌 🔥 Great explanation on loops and syntax!',
+            time: '5w',
+            likes: 1,
+          },
+          {
+            id: `${reel.id}_c2`,
+            username: 'dribspyetrocrown',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+            text: '😍 🔥 🔥 Bookmarked for my upcoming technical interview prep!',
+            time: '5w',
+            likes: 3,
+          },
+          {
+            id: `${reel.id}_c3`,
+            username: 'tech_explorer',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+            text: 'Clean and concise. Thank you for breaking down the concepts so well! 👏',
+            time: '3w',
+            likes: 2,
+          },
+        ]
+        setModalComments(initialSeed)
+      }
+    } catch {
+      setModalComments([])
+    } finally {
+      setCommentsLoading(false)
+    }
   }
 
   const handleAddComment = async e => {
@@ -610,6 +688,7 @@ const Reels = () => {
     setIsSubmitting(true)
 
     try {
+      // Submits exact user-written text without AI rewriting
       const result = await submitComment({
         postId: selectedReelModal?.id || 'reel',
         text: trimmed,
@@ -618,14 +697,15 @@ const Reels = () => {
       })
 
       if (!result.success) {
+        // Display inline moderation error directly beneath comment box
         setCommentError(result.message)
         return
       }
 
-      // Approved comment
+      // Approved comment: persist exact original text
       setCommentError(null)
       setCommentText('')
-      const newC = {
+      const newComment = result.comment || {
         id: `c_${Date.now()}`,
         username: 'mubashir_hussen.sk',
         avatar: '/profile_avatar.jpg',
@@ -633,7 +713,10 @@ const Reels = () => {
         time: 'Just now',
         likes: 0,
       }
-      setModalComments(prev => [...prev, newC])
+      setModalComments(prev => [...prev, newComment])
+      if (selectedReelModal) {
+        selectedReelModal.comments_count = (selectedReelModal.comments_count || 0) + 1
+      }
     } catch {
       setCommentError('Unable to post your comment right now. Please try again.')
     } finally {
@@ -697,17 +780,27 @@ const Reels = () => {
         </section>
       </main>
 
-      {/* Instagram True Dark Mode Reel Viewer Modal */}
+      {/* In-App Reel Viewer Modal with Native Playback & Authentic Comments */}
       {selectedReelModal && (
         <div
           className="reel-dark-modal-backdrop"
-          onClick={() => setSelectedReelModal(null)}
+          onClick={() => {
+            if (modalVideoRef.current) {
+              modalVideoRef.current.pause()
+            }
+            setSelectedReelModal(null)
+          }}
           role="presentation"
         >
           <button
             type="button"
             className="reel-dark-close-corner-btn"
-            onClick={() => setSelectedReelModal(null)}
+            onClick={() => {
+              if (modalVideoRef.current) {
+                modalVideoRef.current.pause()
+              }
+              setSelectedReelModal(null)
+            }}
             aria-label="Close"
           >
             <BsX size={34} />
@@ -720,14 +813,19 @@ const Reels = () => {
             aria-modal="true"
           >
             <div className="reel-dark-modal-split">
-              {/* Left Side: Video Media Screen with Instagram Header Overlay */}
-              <div className="reel-dark-media-pane" onClick={toggleModalPlay}>
-                {/* Top-Left Instagram Username Badge */}
+              {/* Left Side: Native In-App Video Player Screen */}
+              <div
+                className="reel-dark-media-pane"
+                ref={modalPaneRef}
+                onClick={toggleModalPlay}
+              >
+                {/* Top-Left Instagram / Creator Badge */}
                 <div className="reel-media-user-badge">
                   <BsInstagram className="ig-badge-logo" size={16} />
                   <span>@{selectedReelModal.user_name}</span>
                 </div>
 
+                {/* HTML5 In-App Video Player */}
                 <video
                   ref={modalVideoRef}
                   src={selectedReelModal.video_url}
@@ -736,32 +834,155 @@ const Reels = () => {
                   loop
                   muted={modalMuted}
                   className="reel-dark-video-player"
+                  onTimeUpdate={() => {
+                    if (modalVideoRef.current) {
+                      setCurrentTime(modalVideoRef.current.currentTime)
+                      setDuration(modalVideoRef.current.duration || 0)
+                    }
+                  }}
+                  onLoadedMetadata={() => {
+                    if (modalVideoRef.current) {
+                      setDuration(modalVideoRef.current.duration || 0)
+                      setVideoError(false)
+                    }
+                  }}
+                  onWaiting={() => setIsBuffering(true)}
+                  onPlaying={() => {
+                    setIsBuffering(false)
+                    setModalPlaying(true)
+                    setVideoError(false)
+                  }}
+                  onPause={() => setModalPlaying(false)}
+                  onError={() => {
+                    setVideoError(true)
+                    setIsBuffering(false)
+                  }}
                 />
 
-                {/* Top-Right Sound Toggle */}
-                <button
-                  type="button"
-                  className="reel-dark-sound-btn"
-                  onClick={e => {
-                    e.stopPropagation()
-                    setModalMuted(prev => !prev)
-                  }}
-                  aria-label={modalMuted ? 'Unmute' : 'Mute'}
-                >
-                  {modalMuted ? <FiVolumeX size={16} /> : <FiVolume2 size={16} />}
-                </button>
-
-                {/* Play/Pause Overlay Center Circle */}
-                {!modalPlaying && (
-                  <div className="reel-dark-play-indicator">
+                {/* Center Play Indicator Overlay */}
+                {!modalPlaying && !isBuffering && !videoError && (
+                  <div className="reel-dark-play-indicator" aria-label="Paused">
                     <BsPlayFill size={48} />
                   </div>
                 )}
+
+                {/* Buffering Spinner */}
+                {isBuffering && (
+                  <div className="reel-video-loader" aria-label="Loading video">
+                    <div className="reel-spinner" />
+                  </div>
+                )}
+
+                {/* In-App Video Fallback Overlay */}
+                {videoError && (
+                  <div className="reel-video-error-overlay" onClick={e => e.stopPropagation()}>
+                    <BsExclamationTriangleFill size={34} color="#ff4d4f" />
+                    <p className="reel-error-title">In-App Media Stream Fallback</p>
+                    <p className="reel-error-desc">This video source is unavailable. Switch to verified local stream?</p>
+                    <button
+                      type="button"
+                      className="reel-fallback-retry-btn"
+                      onClick={() => {
+                        setVideoError(false)
+                        setSelectedReelModal(prev => ({
+                          ...prev,
+                          video_url: '/videos/sample_reel_1.mp4'
+                        }))
+                        if (modalVideoRef.current) {
+                          modalVideoRef.current.src = '/videos/sample_reel_1.mp4'
+                          modalVideoRef.current.load()
+                          modalVideoRef.current.play().catch(() => {})
+                        }
+                      }}
+                    >
+                      <BsArrowClockwise size={16} />
+                      <span>Play In-App Video</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Modern Integrated Video Controls Overlay */}
+                <div className="reel-video-controls-overlay" onClick={e => e.stopPropagation()}>
+                  {/* Timeline Scrubber */}
+                  <div className="reel-scrub-bar-container">
+                    <input
+                      type="range"
+                      min="0"
+                      max={duration || 100}
+                      step="0.1"
+                      value={currentTime}
+                      onChange={handleSeek}
+                      className="reel-timeline-scrubber"
+                      aria-label="Seek timeline"
+                    />
+                    <div
+                      className="reel-timeline-progress"
+                      style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                    />
+                  </div>
+
+                  <div className="reel-controls-action-bar">
+                    {/* Left: Play/Pause and Time Indicator */}
+                    <div className="reel-controls-left">
+                      <button
+                        type="button"
+                        className="reel-control-btn"
+                        onClick={toggleModalPlay}
+                        aria-label={modalPlaying ? 'Pause' : 'Play'}
+                      >
+                        {modalPlaying ? <BsPauseFill size={20} /> : <BsPlayFill size={20} />}
+                      </button>
+
+                      <span className="reel-time-display">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </span>
+                    </div>
+
+                    {/* Right: Volume & Fullscreen */}
+                    <div className="reel-controls-right">
+                      <div className="reel-volume-control-group">
+                        <button
+                          type="button"
+                          className="reel-control-btn"
+                          onClick={() => {
+                            if (modalVideoRef.current) {
+                              const nextMuted = !modalMuted
+                              modalVideoRef.current.muted = nextMuted
+                              setModalMuted(nextMuted)
+                            }
+                          }}
+                          aria-label={modalMuted ? 'Unmute' : 'Mute'}
+                        >
+                          {modalMuted || volume === 0 ? <FiVolumeX size={18} /> : <FiVolume2 size={18} />}
+                        </button>
+                        <input
+                          type="range"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                          value={modalMuted ? 0 : volume}
+                          onChange={handleVolumeChange}
+                          className="reel-volume-slider"
+                          aria-label="Volume"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="reel-control-btn"
+                        onClick={toggleFullscreen}
+                        aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                      >
+                        {isFullscreen ? <BsFullscreenExit size={16} /> : <BsFullscreen size={16} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Right Side: Instagram Dark Comments & Details Pane */}
+              {/* Right Side: Authentic Comments & Reel Details Pane */}
               <div className="reel-dark-details-pane">
-                {/* 1. Header Row */}
+                {/* 1. Creator Header Row */}
                 <div className="reel-dark-header">
                   <div className="reel-dark-header-user">
                     <img
@@ -807,7 +1028,7 @@ const Reels = () => {
                   </button>
                 </div>
 
-                {/* 2. Scrollable Body: Caption & Comments */}
+                {/* 2. Scrollable Body: Caption & Authentic Comments */}
                 <div className="reel-dark-comments-scroll">
                   {/* Post Caption Row */}
                   <div className="reel-dark-comment-item caption-item">
@@ -832,11 +1053,24 @@ const Reels = () => {
                     </div>
                   </div>
 
-                  {/* User Comments List */}
-                  {modalComments.map(comment => (
+                  {/* Comments Loading State */}
+                  {commentsLoading && (
+                    <div className="reel-comments-loading-state">
+                      <div className="reel-spinner" />
+                      <span>Loading comments...</span>
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {!commentsLoading && modalComments.length === 0 && (
+                    <p className="no-comments-yet-msg">No comments yet. Start the conversation!</p>
+                  )}
+
+                  {/* Persisted Authentic User Comments List */}
+                  {!commentsLoading && modalComments.map(comment => (
                     <div key={comment.id} className="reel-dark-comment-item">
                       <img
-                        src={comment.avatar}
+                        src={comment.avatar || '/profile_avatar.jpg'}
                         alt={comment.username}
                         className="reel-dark-comment-avatar"
                         onError={e => {
@@ -850,7 +1084,7 @@ const Reels = () => {
                           {comment.text}
                         </p>
                         <div className="reel-dark-comment-meta">
-                          <span>{comment.time}</span>
+                          <span>{comment.time || 'Recently'}</span>
                           {comment.likes > 0 && <span>{comment.likes} like</span>}
                           <button
                             type="button"
@@ -917,21 +1151,9 @@ const Reels = () => {
                   <div className="reel-dark-likes-row">
                     <strong>{modalLikesCount.toLocaleString()} likes</strong>
                   </div>
-                  <span className="reel-dark-date-label">August 15</span>
+                  <span className="reel-dark-date-label">In-App Native Reel</span>
 
-                  {selectedReelModal.post_link && (
-                    <a
-                      href={selectedReelModal.post_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="reel-dark-ig-link"
-                    >
-                      <BsInstagram size={13} />
-                      <span>Watch Reel on Instagram ↗</span>
-                    </a>
-                  )}
-
-                  {/* 4. Add a comment input form */}
+                  {/* 4. Authentic Comment Input Form */}
                   <div className="reel-dark-comment-form-wrap">
                     <form className="reel-dark-add-comment-form" onSubmit={handleAddComment}>
                       <button type="button" className="comment-emoji-btn" aria-label="Insert Emoji">

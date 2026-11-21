@@ -31,6 +31,11 @@ class CommentResponse(BaseModel):
     comment: Optional[CommentSuccessItem] = None
     moderation: Optional[CommentModerationDetail] = None
 
+class CommentListResponse(BaseModel):
+    success: bool
+    post_id: str
+    comments: List[CommentSuccessItem]
+
 class ModerationResponse(BaseModel):
     isToxic: bool
     status: str = Field(..., description="ALLOWED or BLOCKED")
