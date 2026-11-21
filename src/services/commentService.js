@@ -4,7 +4,11 @@
  */
 import { checkTextToxicityLocal, saveModerationLog } from './socialShieldAI'
 
-const BACKEND_API_BASE = 'http://localhost:8000'
+const BACKEND_API_BASE =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ||
+  (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? 'https://socialshield-backend.onrender.com'
+    : 'http://localhost:8000')
 
 const USER_FRIENDLY_MODERATION_ERROR =
   'Your comment contains inappropriate or unparliamentary language. Please edit your comment and try again.'

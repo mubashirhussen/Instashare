@@ -7,6 +7,7 @@ import shutil
 import uuid
 import html
 import json
+import time
 from datetime import datetime
 
 from models.schemas import (
@@ -27,17 +28,52 @@ app = FastAPI(
     version="2.4.0"
 )
 
-# Enable CORS for Frontend & Social Media APIs
+# Configurable CORS for Production & Development
+cors_origins_env = os.getenv("CORS_ORIGINS", "")
+if cors_origins_env.strip():
+    allowed_origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
+else:
+    allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Persistent Comments Storage (survives restarts)
+# Production Global Exception Handler (sanitizes error details, prevents stack trace leak)
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    print(f"[ERROR] Uncaught exception on {request.method} {request.url.path}: {str(exc)}")
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "success": False,
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "An unexpected error occurred. Please try again later."
+        }
+    )
+
+# Persistent Comments Storage Engine (survives restarts, dual syncs with MongoDB if configured)
 COMMENTS_FILE_PATH = os.path.join(os.path.dirname(__file__), "data", "comments_db.json")
+
+# Optional MongoDB Connection
+MONGO_URI = os.getenv("MONGO_URI")
+mongo_client = None
+mongo_collection = None
+if MONGO_URI:
+    try:
+        from pymongo import MongoClient
+        mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
+        mongo_db = mongo_client["instashare"]
+        mongo_collection = mongo_db["comments"]
+        mongo_db.command("ping")
+        print("MongoDB Atlas: Connected and ready.")
+    except Exception as e:
+        print("MongoDB Atlas connection skipped / fallback to comments_db.json:", e)
+        mongo_collection = None
 
 def load_stored_comments() -> Dict[str, List[dict]]:
     if os.path.exists(COMMENTS_FILE_PATH):
@@ -53,10 +89,25 @@ def save_stored_comments(data: Dict[str, List[dict]]):
         os.makedirs(os.path.dirname(COMMENTS_FILE_PATH), exist_ok=True)
         with open(COMMENTS_FILE_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        # Dual-sync to MongoDB Atlas if connected
+        if mongo_collection is not None:
+            try:
+                for post_id, comments in data.items():
+                    mongo_collection.update_one(
+                        {"post_id": post_id},
+                        {"$set": {"comments": comments, "updated_at": datetime.utcnow().isoformat()}},
+                        upsert=True
+                    )
+            except Exception as mongo_err:
+                print("MongoDB sync notice:", mongo_err)
     except Exception as e:
         print("Error saving comments to disk:", e)
 
 STORED_COMMENTS: Dict[str, List[dict]] = load_stored_comments()
+
+# In-Memory Rate Limiting Tracker for Comments
+COMMENT_RATE_LIMITS: Dict[str, List[float]] = {}
 
 # In-memory / MongoDB sync logs storage
 MODERATION_LOGS: List[dict] = [
@@ -93,16 +144,21 @@ MODERATION_LOGS: List[dict] = [
 ]
 
 @app.get("/")
+@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {
         "service": "SocialShield AI Moderation Engine",
         "status": "ONLINE",
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "database": "mongodb_atlas" if mongo_collection is not None else "file_backed_comments_db",
         "models": {
             "text": "RoBERTa / DistilBERT",
             "image": "facebook/convnext-tiny-224",
             "video": "OpenCV Frame Sampler + ConvNeXt"
         },
-        "version": "2.4.0"
+        "version": "2.4.0",
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 @app.post("/predict/text", response_model=ModerationResponse)
@@ -204,6 +260,22 @@ def create_comment(request: CommentCreateRequest):
                 "message": "Comment exceeds maximum limit of 500 characters."
             }
         )
+
+    # Anti-abuse rate limiting (maximum 20 submissions per 30s per user)
+    user_key = request.user or "anonymous"
+    now_ts = time.time()
+    user_history = [t for t in COMMENT_RATE_LIMITS.get(user_key, []) if now_ts - t < 30]
+    if len(user_history) >= 20:
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={
+                "success": False,
+                "code": "RATE_LIMIT_EXCEEDED",
+                "message": "Rate limit exceeded. Please wait a moment before posting another comment."
+            }
+        )
+    user_history.append(now_ts)
+    COMMENT_RATE_LIMITS[user_key] = user_history
 
     # Evaluate comment content against moderation pipeline (classify only, never rewrite)
     result = text_pipeline.predict(cleaned, context="comment")

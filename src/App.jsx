@@ -7,70 +7,73 @@ import DirectMessages from './components/DirectMessages'
 import SocialShieldAdmin from './components/SocialShieldAdmin'
 import NotFound from './components/NotFound/Notfound'
 import ProtectedRouter from './components/ProtectedRouter/ProtectedRouter'
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary'
 import './App.css'
 
 const App = () => {
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={<LoginForm />}
-      />
+    <ErrorBoundary>
+      <Routes>
+        <Route
+          path="/login"
+          element={<LoginForm />}
+        />
 
-      {/* Protected Routes */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRouter>
-            <Home />
-          </ProtectedRouter>
-        }
-      />
-      <Route
-        path="/reels"
-        element={
-          <ProtectedRouter>
-            <Reels />
-          </ProtectedRouter>
-        }
-      />
-      <Route
-        path="/users/:id"
-        element={
-          <ProtectedRouter>
-            <UserDetails />
-          </ProtectedRouter>
-        }
-      />
-      <Route
-        path="/my-profile"
-        element={
-          <ProtectedRouter>
-            <UserDetails />
-          </ProtectedRouter>
-        }
-      />
-      <Route
-        path="/direct"
-        element={
-          <ProtectedRouter>
-            <DirectMessages />
-          </ProtectedRouter>
-        }
-      />
-      <Route
-        path="/socialshield-ai"
-        element={
-          <ProtectedRouter>
-            <SocialShieldAdmin />
-          </ProtectedRouter>
-        }
-      />
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRouter>
+              <Home />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="/reels"
+          element={
+            <ProtectedRouter>
+              <Reels />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="/users/:id"
+          element={
+            <ProtectedRouter>
+              <UserDetails />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="/my-profile"
+          element={
+            <ProtectedRouter>
+              <UserDetails />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="/direct"
+          element={
+            <ProtectedRouter>
+              <DirectMessages />
+            </ProtectedRouter>
+          }
+        />
+        <Route
+          path="/socialshield-ai"
+          element={
+            <ProtectedRouter>
+              <SocialShieldAdmin />
+            </ProtectedRouter>
+          }
+        />
 
-      {/* Not Found */}
-      <Route path="/not-found" element={<NotFound />} />
-      <Route path="*" element={<Navigate to="/not-found" replace />} />
-    </Routes>
+        {/* Not Found */}
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="*" element={<Navigate to="/not-found" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }
 

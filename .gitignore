@@ -7,10 +7,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node & Build artifacts
 node_modules
 dist
 dist-ssr
 *.local
+
+# Environment variables & secrets (NEVER commit to Git)
+.env
+.env.*
+!.env.example
+
+# Python Cache & Uploads
+__pycache__/
+*.py[cod]
+*$py.class
+socialshield_backend/__pycache__/
+socialshield_backend/models/__pycache__/
+socialshield_backend/services/__pycache__/
+socialshield_backend/uploads_temp/
+socialshield_backend/.env
+socialshield_backend/.env.*
+!socialshield_backend/.env.example
+
+# Temporary lock and office files
+~$*
+*.tmp
 
 # Editor directories and files
 .vscode/*
