@@ -181,8 +181,10 @@ const COMMON_STOPWORDS = new Set([
 // Build pre-compiled fast lookups
 const indexedData = []
 for (const item of datasetItems) {
-  const native = (item.native_script || '').trim().toLowerCase()
-  const roman = (item.romanized || '').trim().toLowerCase()
+  const rawNative = (item.native_script || '').trim().toLowerCase()
+  const rawRoman = (item.romanized || '').trim().toLowerCase()
+  const native = rawNative && rawNative !== '-' && rawNative !== '--' && rawNative !== 'n/a' && rawNative.length >= 2 ? rawNative : ''
+  const roman = rawRoman && rawRoman !== '-' && rawRoman !== '--' && rawRoman !== 'n/a' && rawRoman.length >= 2 ? rawRoman : ''
   const tokens = roman ? roman.split(/\s+/).filter(t => t.length >= 3 && !COMMON_STOPWORDS.has(t)) : []
 
   indexedData.push({

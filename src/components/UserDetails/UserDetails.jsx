@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
 import {
@@ -80,6 +80,66 @@ const UserDetails = () => {
   const [editBio, setEditBio] = useState('')
   const [editAvatar, setEditAvatar] = useState('')
   const [editWebsite, setEditWebsite] = useState('')
+  const fileInputRef = useRef(null)
+
+  const isOwnProfile =
+    !id ||
+    id === 'my-profile' ||
+    id === 'current-user' ||
+    id === 'current_user' ||
+    id === profileData?.user_name ||
+    id === 'mubashir_hussen.sk'
+
+  const handleAvatarFileSelect = async e => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 1. Validation: MIME type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file (JPEG, PNG, WebP).')
+      return
+    }
+
+    // 2. Validation: File size <= 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size exceeds 5MB limit. Please choose a smaller file.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = async event => {
+      const dataUrl = event.target.result
+      const current = getUserProfile()
+      const updated = {
+        ...current,
+        profilePic: dataUrl,
+      }
+      saveUserProfile(updated)
+      setProfileData(prev => ({
+        ...prev,
+        profile_pic: dataUrl,
+      }))
+
+      // Backend sync if online
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('user', current.username || 'mubashir_hussen.sk')
+        const backendBase =
+          (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ||
+          (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+            ? 'https://socialshield-backend.onrender.com'
+            : 'http://localhost:8000')
+        await fetch(`${backendBase}/api/profile/upload-avatar`, {
+          method: 'POST',
+          body: formData,
+        })
+      } catch (err) {
+        console.debug('Backend avatar sync note:', err)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
 
   const jwtToken = Cookies.get('jwt_token')
 
@@ -256,6 +316,28 @@ const UserDetails = () => {
                 />
               </div>
             </div>
+
+            {isOwnProfile && (
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleAvatarFileSelect}
+                  style={{ display: 'none' }}
+                  data-testid="profile-file-input"
+                />
+                <button
+                  type="button"
+                  className="avatar-upload-plus-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload new profile picture"
+                  aria-label="Upload profile photo"
+                >
+                  <BiPlus size={18} />
+                </button>
+              </>
+            )}
           </div>
 
           <div className="profile-details-column">

@@ -212,18 +212,26 @@ class MultilingualProfanityDetector:
         # 1. Native script match
         for it in self.items:
             native = (it.get("native_script") or "").strip().lower()
-            if native and native in lower_text:
-                matched_item = it
-                matched_word = it.get("native_script")
-                break
+            if not native or native in ("-", "--", "n/a", "none") or len(native) < 2:
+                continue
+            if native.isascii():
+                if re.search(r"\b" + re.escape(native) + r"\b", lower_text):
+                    matched_item = it
+                    matched_word = it.get("native_script")
+                    break
+            else:
+                if native in lower_text:
+                    matched_item = it
+                    matched_word = it.get("native_script")
+                    break
 
         # 2. Romanized phrase match (exact substring or multi-token match excluding common stopwords)
         if not matched_item:
             for it in self.items:
                 roman = (it.get("romanized") or "").strip().lower()
-                if not roman:
+                if not roman or roman in ("-", "--", "n/a", "none") or len(roman) < 2:
                     continue
-                # Full phrase exact match
+                # Full phrase exact match with word boundaries
                 if re.search(r"\b" + re.escape(roman) + r"\b", lower_text):
                     matched_item = it
                     matched_word = roman

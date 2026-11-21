@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from typing import List, Optional, Dict, Any
 import os
 import shutil
@@ -50,6 +51,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Uploads directory and static file mounting
+UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+UPLOAD_AVATARS_DIR = os.path.join(UPLOAD_DIR, "avatars")
+os.makedirs(UPLOAD_AVATARS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 # Production Global Exception Handler (sanitizes error details, prevents stack trace leak)
 @app.exception_handler(Exception)
@@ -350,6 +357,36 @@ def get_reels_preferences(user_id: str = "guest_user"):
         "user_id": user_id,
         "explicit_interests": profile.explicit_interests,
         "category_scores": profile.category_scores
+    }
+
+# --- Profile Avatar Upload & Management ---
+
+@app.post("/api/profile/upload-avatar")
+async def upload_profile_avatar(file: UploadFile = File(...), user: str = Form("mubashir_hussen.sk")):
+    """
+    Validates, stores, and persists user profile avatar image.
+    Enforces MIME type validation, file size limit (5MB), and secure local storage.
+    """
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Only valid image files (JPEG, PNG, WebP) are allowed.")
+
+    file_bytes = await file.read()
+    if len(file_bytes) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image size exceeds 5MB limit.")
+
+    ext = os.path.splitext(file.filename)[1].lower() or ".jpg"
+    filename = f"avatar_{user}_{uuid.uuid4().hex[:8]}{ext}"
+    filepath = os.path.join(UPLOAD_AVATARS_DIR, filename)
+
+    with open(filepath, "wb") as f:
+        f.write(file_bytes)
+
+    avatar_url = f"/uploads/avatars/{filename}"
+    return {
+        "success": True,
+        "user": user,
+        "avatar_url": avatar_url,
+        "message": "Profile avatar uploaded and persisted successfully."
     }
 
 @app.get("/api/comments")

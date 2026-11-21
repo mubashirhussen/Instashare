@@ -33,6 +33,30 @@
   margin-left: 24px;
 }
 
+.avatar-upload-plus-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0095f6;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.avatar-upload-plus-btn:hover {
+  background: #1877f2;
+  transform: scale(1.1);
+}
+
 .note-bubble {
   position: absolute;
   top: -16px;

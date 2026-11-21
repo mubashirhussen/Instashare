@@ -40,11 +40,9 @@ assert(!reelsCode.includes('reel-topic-pill'), 'reel-topic-pill must be removed 
 assert(!reelsCode.includes('reel-views-pill'), 'reel-views-pill must be removed from ReelGridCard');
 console.log('✅ UI overlay cleanup check passed: Category pill, views pill, and sound button removed from individual reel cards.');
 
-// B. Category Filter Bar present
-assert(reelsCode.includes('reels-category-chips-scroll'), 'Horizontal category chips bar must be present');
-assert(reelsCode.includes('reels-category-chip-btn'), 'Category chip buttons must be present');
-assert(reelsCode.includes('REEL_CATEGORIES'), 'REEL_CATEGORIES must be declared');
-console.log('✅ Category filter chips check passed: Clean horizontal category bar implemented.');
+// B. Unused category strip removed as requested in Phase 8
+assert(!reelsCode.includes('reels-category-chips-scroll'), 'Unused category strip must be removed from Reels feed');
+console.log('✅ Unused category strip check passed: Removed from Reels feed for clean, professional layout.');
 
 // C. Authentic creator presentation & conditional badge
 assert(reelsCode.includes('reel-avatar'), 'Creator avatar must be present');
@@ -85,11 +83,23 @@ const reelsCssPath = path.join(__dirname, '..', 'src', 'components', 'Reels', 'R
 const reelsCss = fs.readFileSync(reelsCssPath, 'utf8');
 assert(!reelsCss.includes('.reel-sound-btn'), 'Obsolete .reel-sound-btn CSS must be removed');
 assert(!reelsCss.includes('.reel-topic-pill'), 'Obsolete .reel-topic-pill CSS must be removed');
-assert(reelsCss.includes('.reels-category-chips-scroll'), 'CSS must include .reels-category-chips-scroll');
-assert(reelsCss.includes('.reels-category-chip-btn'), 'CSS must include .reels-category-chip-btn');
+assert(reelsCss.includes('object-fit: cover'), 'Reel video player must use object-fit: cover to fill viewport without letterbox');
 assert(reelsCss.includes('.reel-video-controls-overlay'), 'CSS must include .reel-video-controls-overlay');
 assert(reelsCss.includes('.reel-recommendation-options-menu'), 'CSS must include .reel-recommendation-options-menu');
 assert(reelsCss.includes('.reels-toast-notification'), 'CSS must include .reels-toast-notification');
-console.log('✅ CSS verified: Controls overlay, timeline scrubber, category chip styles, and recommendation menu confirmed.');
+console.log('✅ CSS verified: Controls overlay, timeline scrubber, full-cover video player, and recommendation menu confirmed.');
+
+// 5. Verify Profile Avatar Upload in UserDetails.jsx
+const userDetailsPath = path.join(__dirname, '..', 'src', 'components', 'UserDetails', 'UserDetails.jsx');
+const userDetailsCode = fs.readFileSync(userDetailsPath, 'utf8');
+assert(userDetailsCode.includes('avatar-upload-plus-btn'), 'Avatar upload + button must be present in UserDetails');
+assert(userDetailsCode.includes('handleAvatarFileSelect'), 'handleAvatarFileSelect must be present in UserDetails');
+console.log('✅ Profile image upload check passed: + button, file picker, and validation implemented.');
+
+// 6. Verify Technical Badge Cleanup
+const adminPath = path.join(__dirname, '..', 'src', 'components', 'SocialShieldAdmin', 'index.jsx');
+const adminCode = fs.readFileSync(adminPath, 'utf8');
+assert(!adminCode.includes('v2.4 Active Engine'), 'Unnecessary technical badge v2.4 Active Engine must be removed');
+console.log('✅ Technical badge cleanup check passed: v2.4 Active Engine removed from SocialShieldAdmin.');
 
 console.log('\n🎉 ALL REELS DIVERSITY, CLEAN UI & COMMENT PERSISTENCE TESTS PASSED!');

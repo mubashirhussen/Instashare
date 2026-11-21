@@ -375,9 +375,6 @@ export const PostCard = ({ post, onClickUser }) => {
 
       if (!result.success) {
         setCommentError(result.message)
-        if (result.blockResult) {
-          setShieldAlert(result.blockResult)
-        }
         return
       }
 

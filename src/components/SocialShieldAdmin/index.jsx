@@ -86,7 +86,6 @@ const SocialShieldAdmin = () => {
             <div>
               <div className="hero-title-row">
                 <h1 className="admin-title">SocialShield AI</h1>
-                <span className="version-badge">v2.4 Active Engine</span>
               </div>
               <p className="admin-subtitle">
                 Real-Time Toxic Content Detection & Pre-Publish Moderation Decision Engine

@@ -355,11 +355,8 @@ const Reels = () => {
       })
 
       if (!result.success) {
-        // Display inline moderation error directly beneath comment box
+        // Display compact inline moderation error directly beneath comment box without popup modal
         setCommentError(result.message)
-        if (result.blockResult) {
-          setShieldAlert(result.blockResult)
-        }
         return
       }
 
@@ -562,20 +559,6 @@ const Reels = () => {
       <Header searchInput={searchInput} setSearchInput={setSearchInput} />
       
       <main className="reels-container-main">
-        {/* Category Filter Chips Bar */}
-        <div className="reels-category-chips-scroll" role="tablist" aria-label="Reels Categories">
-          {REEL_CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              type="button"
-              className={`reels-category-chip-btn ${selectedCategory === cat ? 'active' : ''}`}
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
         {/* 5:5 Side-by-Side Reels Grid Structure */}
         <section className="side-by-side-reels-grid-5">
           {visibleReels.length > 0 ? (
