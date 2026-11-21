@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "multilingual_profanity.json")
 
-# Subtype translations
+# Subtype translations across 6 languages
 SUBTYPE_TRANSLATIONS = {
     'Maternal Profanity': {
         'en': 'Maternal Profanity / Mother-directed slur',
@@ -17,6 +17,7 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'తల్లిని ఉద్దేశించిన తీవ్ర అసభ్యకరమైన తిట్టు (Maternal Profanity)',
         'ta': 'தாய் பற்றிய தகாத வார்த்தை (Maternal Profanity)',
         'kn': 'ತಾಯಿಯನ್ನು ನಿಂದಿಸುವ ಅಸಭ್ಯ ಪದ (Maternal Profanity)',
+        'ml': 'അമ്മയെ അവഹേളിക്കുന്ന അശ്ലീല വാക്ക് (Maternal slur)',
     },
     'Paternal Profanity': {
         'en': 'Paternal Profanity / Father-directed slur',
@@ -24,6 +25,7 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'తండ్రిని ఉద్దేశించిన అసభ్యకరమైన దూషణ (Paternal Profanity)',
         'ta': 'தந்தை பற்றிய தகாத வார்த்தை (Paternal Profanity)',
         'kn': 'ತಂದೆಯನ್ನು ನಿಂದಿಸುವ ಅಸಭ್ಯ ಪದ (Paternal Profanity)',
+        'ml': 'പിതാവിനെ അവഹേളിക്കുന്ന അശ്ലീല വാക്ക് (Paternal slur)',
     },
     'Sexual Profanity': {
         'en': 'Sexually Explicit / Vulgar Profanity',
@@ -31,6 +33,7 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'లైంగికంగా అత్యంత అసభ్యకరమైన పదజాలం (Sexual Profanity)',
         'ta': 'பாலியல் ரீதியான ஆபாச வார்த்தை (Sexual Profanity)',
         'kn': 'ಲೈಂಗಿಕವಾಗಿ ಅತ್ಯಂತ ಅಶ್ಲೀಲ ಪದ (Sexual Profanity)',
+        'ml': 'ലൈംഗികമായി അങ്ങേയറ്റം അശ്ലീലമായ വാക്ക് (Sexual profanity)',
     },
     'Body-part Profanity': {
         'en': 'Crude Body-part Profanity',
@@ -38,6 +41,7 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'శరీర భాగాలకు సంబంధించిన అత్యంత అసభ్యకరమైన పదజాలం (Body-part Profanity)',
         'ta': 'உடல் உறுப்பு தொடர்பான தகாத வார்த்தை (Body-part Profanity)',
         'kn': 'ದೇಹದ ಭಾಗಗಳಿಗೆ ಸಂಬಂಧಿಸಿದ ಅಸಭ್ಯ ಪದ (Body-part Profanity)',
+        'ml': 'ജനനേന്ദ്രിയ സംബന്ധിയായ അശ്ലീല വാക്ക് (Body-part Profanity)',
     },
     'Slur Profanity': {
         'en': 'Derogatory Slur / Abusive Language',
@@ -45,6 +49,7 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'తీవ్రమైన నిందాపూర్వక అసభ్య దూషణ (Slur Profanity)',
         'ta': 'இழிவான மற்றும் அவதூறான வார்த்தை (Slur Profanity)',
         'kn': 'ಅವಮಾನಕರ ಮತ್ತು ನಿಂದನೀಯ ಪದ (Slur Profanity)',
+        'ml': 'അപമാനകരമായ നിന്ദ്യമായ വാക്ക് (Slur)',
     },
     'Death-wish Profanity': {
         'en': 'Death-wish / Severe Harassment Threat',
@@ -52,13 +57,122 @@ SUBTYPE_TRANSLATIONS = {
         'te': 'మరణాన్ని కోరుకునే తీవ్రమైన బెదిరింపు (Death-wish Profanity)',
         'ta': 'மரண அச்சுறுத்தல் மற்றும் கடுமையான துன்புறுத்தல் (Death-wish)',
         'kn': 'ಸಾವು ಬಯಸುವ ಗಂಭೀರ ಬೆದರಿಕೆ (Death-wish Profanity)',
+        'ml': 'മരണം ആഗ്രഹിക്കുന്ന കടുത്ത ഭീഷണി (Death-wish)',
+    },
+    'Hybrid Profanity': {
+        'en': 'Severe hate slur / Hybrid unparliamentary profanity',
+        'hi': 'गंभीर हाइब्रिड असंसदीय गाली (Hybrid profanity)',
+        'te': 'తీవ్రమైన అసభ్యకరమైన పదజాలం (Hybrid profanity)',
+        'ta': 'கடுமையான அவதூறு வார்த்தை (Hybrid profanity)',
+        'kn': 'ಅತ್ಯಂತ ಗಂಭೀರ ಅಸಭ್ಯ ಪದ (Hybrid profanity)',
+        'ml': 'കടുത്ത വിദ്വേഷ അധിക്ഷേപം (Hybrid profanity)',
     },
     'General Profanity': {
-        'en': 'Unparliamentary Profanity',
+        'en': 'Explicit vulgar English profanity',
         'hi': 'असंसदीय एवं अमर्यादित भाषा',
         'te': 'అసభ్యకరమైన మరియు అసభా ప్రామాణిక భాష',
         'ta': 'தகாத மற்றும் அவதூறான மொழி',
         'kn': 'ಅಸಭ್ಯ ಹಾಗೂ ನಿಯಮಬಾಹಿರ ಭಾಷೆ',
+        'ml': 'അസഭ്യമായ ഭാഷ',
+    },
+}
+
+DIRECT_MEANINGS = {
+    'lanja koduku': {
+        'en': 'Son of a whore / prostitute',
+        'hi': 'वेश्या की संतान / रंडी का बेटा (Veshya ki santaan)',
+        'te': 'వేశ్య యొక్క కుమారుడు / లంజ కొడుకు (Veshya yokka kumaarudu)',
+        'ta': 'வேசியின் மகன் (Vaesiyin magan)',
+        'kn': 'ವೇಶ್ಯೆಯ ಮಗ (Vēśyeya maga)',
+        'ml': 'വ്യഭിചാരിയുടെ മകൻ (Vyabhichaariyude makan)',
+    },
+    'pooku sannaasi': {
+        'en': 'Vaginal bum / Crude anatomical insult',
+        'hi': 'योनि-संबंधी अत्यंत अश्लील गाली (Yoni-sambandhi ashleel gaali)',
+        'te': 'పూకు సన్నాసి / అసభ్యకరమైన తిట్టు',
+        'ta': 'உடல் உறுப்பு தொடர்பான தகாத அவதூறு வார்த்தை (Thagadha vaarthai)',
+        'kn': 'ದೇಹದ ಭಾಗಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಅಶ್ಲೀಲ ಪದ (Ashleela pada)',
+        'ml': 'ജനനേന്ദ്രിയ സംബന്ധിയായ അശ്ലീല വാക്ക് (Ashleelamaaya vaakku)',
+    },
+    'puku sannaasi': {
+        'en': 'Vaginal bum / Crude anatomical insult',
+        'hi': 'योनि-संबंधी अत्यंत अश्लील गाली (Yoni-sambandhi ashleel gaali)',
+        'te': 'పూకు సన్నాసి / అసభ్యకరమైన తిట్టు',
+        'ta': 'உடல் உறுப்பு தொடர்பான தகாத அவதூறு வார்த்தை (Thagadha vaarthai)',
+        'kn': 'ದೇಹದ ಭಾಗಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಅಶ್ಲೀಲ ಪದ (Ashleela pada)',
+        'ml': 'ജനനേന്ദ്രിയ സംബന്ധിയായ അശ്ലീല വാക്ക് (Ashleelamaaya vaakku)',
+    },
+    'puku': {
+        'en': 'Vagina (Crude anatomical slur)',
+        'hi': 'योनि (अत्यंत अश्लील शब्द)',
+        'te': 'పూకు / యోని (అత్యంత అసభ్యకరమైన పదం)',
+        'ta': 'பெண் பிறப்புறுப்பு (தகாத ஆபாச வார்த்தை)',
+        'kn': 'ಯೋನಿ (ಅತ್ಯಂತ ಅಶ್ಲೀಲ ಪದ)',
+        'ml': 'സ്ത്രീ ജനനേന്ദ്രിയം (അശ്ലീല വാക്ക്)',
+    },
+    'pooku': {
+        'en': 'Vagina (Crude anatomical slur)',
+        'hi': 'योनि (अत्यंत अश्लील शब्द)',
+        'te': 'పూకు / యోని (అత్యంత అసభ్యకరమైన పదం)',
+        'ta': 'பெண் பிறப்புறுப்பு (தகாத ஆபாச வார்த்தை)',
+        'kn': 'ಯೋನಿ (ಅತ್ಯಂತ ಅಶ್ಲೀಲ ಪದ)',
+        'ml': 'സ്ത്രീ ജനനേന്ദ്രിയം (അശ്ലീല വാക്ക്)',
+    },
+    'nuvvu puttakundaa undaalsindi': {
+        'en': 'You should never have been born (Death-wish harassment)',
+        'hi': 'तुम्हारा जन्म ही नहीं होना चाहिए था (Tumhara janm hi nahi hona chahiye tha)',
+        'te': 'నువ్వు పుట్టకుండా ఉండాల్సింది (Nuvvu puttakundaa undaalsindi)',
+        'ta': 'நீ பிறந்திருக்கவே கூடாது (Nee pirandhirukkavae koodadhu)',
+        'kn': 'ನೀನು ಹುಟ್ಟಲೇಬಾರದಿತ್ತು (Neenu huttalebaaradittu)',
+        'ml': 'നീ ഒരിക്കലും ജനിക്കാതിരിക്കണമായിരുന്നു (Nee orikkalum janikkaathirikkanamaayirunnu)',
+    },
+    'chutiya': {
+        'en': 'Genital-reference idiot / crude vulgar fool',
+        'hi': 'चूतिया / मूर्ख (Genital-reference fool)',
+        'te': 'చేతగాని దద్దమ్మ / అసభ్యకరమైన తిట్టు',
+        'ta': 'முட்டாள் / தகாத ஆபாச வார்த்தை (Muttaal)',
+        'kn': 'ದಡ್ಡ / ಅಶ್ಲೀಲ ನಿಂದನೆ (Dadda)',
+        'ml': 'വിഡ്ഢി / അശ്ലീല അധിക്ഷേപം (Viddhi)',
+    },
+    'thevidiya': {
+        'en': 'Prostitute / Temple courtesan slur',
+        'hi': 'वेश्या / रंडी (Veshya slur)',
+        'te': 'వేశ్య / లంజ (Veshya slur)',
+        'ta': 'தேவடியா / வேசி (Dhevadiaa slur)',
+        'kn': 'ಸೂಳೆ (Soole slur)',
+        'ml': 'വ്യഭിചാരിണി (Vyabhichaarini slur)',
+    },
+    'madarchod': {
+        'en': 'Motherfucker (Extreme maternal sexual slur)',
+        'hi': 'मादरचोद (माँ से संबंधित अत्यंत अश्लील गाली)',
+        'te': 'తల్లిని ఉద్దేశించిన అత్యంత అసభ్యకరమైన తిట్టు',
+        'ta': 'தாயை இழிவுபடுத்தும் கடுமையான அவதூறு',
+        'kn': 'ತಾಯಿಯನ್ನು ನಿಂದಿಸುವ ಅತಿ ತೀವ್ರ ಅಸಭ್ಯ ಪದ',
+        'ml': 'അമ്മയെ അധിക്ഷേപിക്കുന്ന കടുത്ത അശ്ലീല വാക്ക്',
+    },
+    'soole': {
+        'en': 'Prostitute (Kannada slur)',
+        'hi': 'वेश्या / रंडी (Veshya)',
+        'te': 'వేశ్య / లంజ (Veshya)',
+        'ta': 'ವೇಸಿ (Veesi)',
+        'kn': 'ಸೂಳೆ (Soole)',
+        'ml': 'വ്യഭിചാരിണി (Vyabhichaarini)',
+    },
+    'fuck': {
+        'en': 'Explicit vulgar English profanity',
+        'hi': 'असंसदीय एवं अमर्यादित भाषा',
+        'te': 'అసభ్యకరమైన మరియు అసభా ప్రామాణిక భాష',
+        'ta': 'தகாத மற்றும் அவதூறான மொழி',
+        'kn': 'ಅಸಭ್ಯ ಹಾಗೂ ನಿಯಮಬಾಹಿರ ಭಾಷೆ',
+        'ml': 'അസഭ്യമായ ഭാഷ',
+    },
+    'fuck girl': {
+        'en': 'Explicit vulgar English profanity',
+        'hi': 'असंसदीय एवं अमर्यादित भाषा',
+        'te': 'అసభ్యకరమైన మరియు అసభా ప్రామాణిక భాష',
+        'ta': 'தகாத மற்றும் அவதூறான மொழி',
+        'kn': 'ಅಸಭ್ಯ ಹಾಗೂ ನಿಯಮಬಾಹಿರ ಭಾಷೆ',
+        'ml': 'അസഭ്യമായ ഭാഷ',
     },
 }
 
@@ -156,36 +270,71 @@ class MultilingualProfanityDetector:
         meaning = matched_item.get("english_meaning", "Unparliamentary explicit content")
         source_lang = matched_item.get("language", "Telugu")
 
+        lower_matched = (matched_word or "").lower().strip()
+        lower_roman = (matched_item.get("romanized") or "").lower().strip()
+        
+        # Check direct meanings first
+        direct = None
+        for k, v in DIRECT_MEANINGS.items():
+            if k in lower_matched or lower_matched in k or k in lower_roman or k in lower_text:
+                direct = v
+                break
+
+        en_meaning = direct["en"] if direct else meaning
+        hi_meaning = direct["hi"] if direct else sub_info["hi"]
+        te_meaning = direct["te"] if direct else sub_info["te"]
+        ta_meaning = direct["ta"] if direct else sub_info["ta"]
+        kn_meaning = direct["kn"] if direct else sub_info["kn"]
+        ml_meaning = direct["ml"] if direct else sub_info["ml"]
+
         translations = {
             "english": {
                 "langName": "English",
                 "nativeLangLabel": "English",
+                "word": matched_word,
+                "meaning": en_meaning,
                 "statement": f"Flagged toxic statement: '{clean_text}'",
                 "explanation": f"'{matched_word}' is classified as {sub_info['en']} ({meaning}). The statement violates parliamentary standards and community guidelines."
             },
             "hindi": {
                 "langName": "Hindi",
                 "nativeLangLabel": "हिन्दी",
+                "word": matched_word,
+                "meaning": hi_meaning,
                 "statement": f"ध्वजांकित हानिकारक कथन: '{clean_text}'",
                 "explanation": f"कथन में '{matched_word}' को {sub_info['hi']} ({meaning}) के रूप में पहचाना गया है; यह असंसदीय व हानिकारक है।"
             },
             "telugu": {
                 "langName": "Telugu",
                 "nativeLangLabel": "తెలుగు",
+                "word": matched_word,
+                "meaning": te_meaning,
                 "statement": f"హానికరమైనదిగా గుర్తించబడిన వాక్యం: '{clean_text}'",
                 "explanation": f"వాక్యంలో '{matched_word}' అనేది {sub_info['te']} ({meaning}) గా గుర్తించబడింది; ఇది అసభ్యకరమైనది మరియు నియమాలకు విరుద్ధం."
             },
             "tamil": {
                 "langName": "Tamil",
                 "nativeLangLabel": "தமிழ்",
+                "word": matched_word,
+                "meaning": ta_meaning,
                 "statement": f"தீங்கு விளைவிக்கும் செய்தியாகக் குறிக்கப்பட்டது: '{clean_text}'",
                 "explanation": f"'{matched_word}' என்பது {sub_info['ta']} ({meaning}) என அடையாளம் காணப்பட்டுள்ளது; இது தகாத உள்ளடக்கமாகும்."
             },
             "kannada": {
                 "langName": "Kannada",
                 "nativeLangLabel": "ಕನ್ನಡ",
+                "word": matched_word,
+                "meaning": kn_meaning,
                 "statement": f"ಹಾನಿಕಾರಕವೆಂದು ಗುರುತಿಸಲಾದ ಸಂದೇಶ: '{clean_text}'",
                 "explanation": f"'{matched_word}' ಎಂಬುದು {sub_info['kn']} ({meaning}) ಎಂದು ಗುರುತಿಸಲಾಗಿದೆ; ಇದು ಅಸಭ್ಯ ಹಾಗೂ ನಿಯಮಬಾಹಿರವಾಗಿದೆ."
+            },
+            "malayalam": {
+                "langName": "Malayalam",
+                "nativeLangLabel": "മലയാളം",
+                "word": matched_word,
+                "meaning": ml_meaning,
+                "statement": f"ഫ്ലാഗ് ചെയ്ത ഹാനികരമായ സന്ദേശം: '{clean_text}'",
+                "explanation": f"'{matched_word}' എന്നത് {sub_info['ml']} ({meaning}) ആയി തിരിച്ചറിഞ്ഞു; ഇത് അനുചിതമായ ഉള്ളടക്കമാണ്."
             }
         }
 
@@ -264,6 +413,31 @@ class TextModerationPipeline:
         if is_toxic:
             reason = f"Detected {', '.join(categories)} violating platform community guidelines."
 
+        multilingual_data = None
+        if is_toxic and not multi_res:
+            cat_name = categories[0] if categories else "General Profanity"
+            sub_info = SUBTYPE_TRANSLATIONS.get(cat_name, SUBTYPE_TRANSLATIONS["General Profanity"])
+            matched_kw = clean_text[:30]
+            multilingual_data = {
+                "isProfane": True,
+                "matchedWord": matched_kw,
+                "sourceLanguage": "English",
+                "subType": cat_name,
+                "severity": "Critical" if confidence >= 0.9 else "High",
+                "parliamentaryViolation": "Yes",
+                "violationTitle": f"Violated Parliamentary Standards: Detected Multilingual profanity / unparliamentary language ({cat_name})",
+                "score": round(confidence * 100, 1),
+                "confidence": f"{round(confidence * 100, 1)}%",
+                "translations": {
+                    "english": {"langName": "English", "nativeLangLabel": "English", "word": matched_kw, "meaning": sub_info["en"]},
+                    "hindi": {"langName": "Hindi", "nativeLangLabel": "हिन्दी", "word": matched_kw, "meaning": sub_info["hi"]},
+                    "telugu": {"langName": "Telugu", "nativeLangLabel": "తెలుగు", "word": matched_kw, "meaning": sub_info["te"]},
+                    "tamil": {"langName": "Tamil", "nativeLangLabel": "தமிழ்", "word": matched_kw, "meaning": sub_info["ta"]},
+                    "kannada": {"langName": "Kannada", "nativeLangLabel": "ಕನ್ನಡ", "word": matched_kw, "meaning": sub_info["kn"]},
+                    "malayalam": {"langName": "Malayalam", "nativeLangLabel": "മലയാളം", "word": matched_kw, "meaning": sub_info["ml"]},
+                }
+            }
+
         return {
             "isToxic": is_toxic,
             "status": "BLOCKED" if is_toxic else "ALLOWED",
@@ -273,6 +447,7 @@ class TextModerationPipeline:
             "reason": reason,
             "originalText": text,
             "context": context,
+            "multilingual": multilingual_data,
             "timestamp": datetime.utcnow().isoformat()
         }
 

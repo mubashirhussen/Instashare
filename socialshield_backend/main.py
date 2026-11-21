@@ -308,7 +308,8 @@ def create_comment(request: CommentCreateRequest):
                 "moderation": {
                     "blocked": True,
                     "categories": result.get("categories", [])
-                }
+                },
+                "blockResult": result
             }
         )
 

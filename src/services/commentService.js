@@ -121,6 +121,7 @@ export const submitComment = async ({
       success: false,
       code: 'COMMENT_MODERATION_REJECTED',
       message: USER_FRIENDLY_MODERATION_ERROR,
+      blockResult: localCheck,
       moderation: {
         blocked: true,
         categories: localCheck.categories || [],
@@ -152,6 +153,7 @@ export const submitComment = async ({
         success: false,
         code: errorData.code || 'COMMENT_MODERATION_REJECTED',
         message: USER_FRIENDLY_MODERATION_ERROR,
+        blockResult: errorData.blockResult || localCheck,
         moderation: errorData.moderation || { blocked: true },
       }
     }

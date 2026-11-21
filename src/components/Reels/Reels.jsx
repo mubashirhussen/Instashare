@@ -24,6 +24,7 @@ import {
 } from 'react-icons/bs'
 import { FiVolume2, FiVolumeX } from 'react-icons/fi'
 import Header from '../Header'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
 import { submitComment, fetchComments } from '../../services/commentService'
 import { getCustomFeedPosts } from '../../utils/storage'
 import './Reels.css'
@@ -559,6 +560,7 @@ const Reels = () => {
   const [modalComments, setModalComments] = useState([])
   const [commentsLoading, setCommentsLoading] = useState(false)
   const [commentError, setCommentError] = useState(null)
+  const [shieldAlert, setShieldAlert] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [allReels, setAllReels] = useState(LEARNING_REELS_LIST)
 
@@ -699,11 +701,15 @@ const Reels = () => {
       if (!result.success) {
         // Display inline moderation error directly beneath comment box
         setCommentError(result.message)
+        if (result.blockResult) {
+          setShieldAlert(result.blockResult)
+        }
         return
       }
 
       // Approved comment: persist exact original text
       setCommentError(null)
+      setShieldAlert(null)
       setCommentText('')
       const newComment = result.comment || {
         id: `c_${Date.now()}`,
@@ -1202,6 +1208,13 @@ const Reels = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {shieldAlert && (
+        <SocialShieldAlert
+          blockResult={shieldAlert}
+          onClose={() => setShieldAlert(null)}
+        />
       )}
     </div>
   )

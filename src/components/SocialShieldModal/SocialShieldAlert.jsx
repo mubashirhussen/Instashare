@@ -72,12 +72,12 @@ const SocialShieldAlert = ({ blockResult, onClose }) => {
   const sourceLang = multilingual?.sourceLanguage || 'Telugu'
 
   const langList = [
-    { key: 'english', labelPrefix: 'Meaning:' },
-    { key: 'hindi', labelPrefix: 'अर्थ (Meaning):' },
-    { key: 'telugu', labelPrefix: 'అర్థం (Meaning):' },
-    { key: 'tamil', labelPrefix: 'பொருள் (Meaning):' },
-    { key: 'kannada', labelPrefix: 'ಅರ್ಥ (Meaning):' },
-    { key: 'malayalam', labelPrefix: 'അർത്ഥം (Meaning):' },
+    { key: 'english', labelPrefix: 'MEANING:' },
+    { key: 'hindi', labelPrefix: 'अर्थ (MEANING):' },
+    { key: 'telugu', labelPrefix: 'అర్థం (MEANING):' },
+    { key: 'tamil', labelPrefix: 'பொருள் (MEANING):' },
+    { key: 'kannada', labelPrefix: 'ಅರ್ಥ (MEANING):' },
+    { key: 'malayalam', labelPrefix: 'അർത്ഥം (MEANING):' },
   ]
 
   return (

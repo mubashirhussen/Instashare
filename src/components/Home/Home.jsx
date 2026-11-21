@@ -18,6 +18,7 @@ import { ThreeDots } from 'react-loader-spinner'
 import Header from '../Header'
 import UserStories from '../UserStories'
 import FailureView from '../FailureView'
+import SocialShieldAlert from '../SocialShieldModal/SocialShieldAlert'
 import { submitComment } from '../../services/commentService'
 import { getCustomFeedPosts, getUserProfile } from '../../utils/storage'
 import './Home.css'
@@ -352,6 +353,7 @@ export const PostCard = ({ post, onClickUser }) => {
   }
 
   const [commentError, setCommentError] = useState(null)
+  const [shieldAlert, setShieldAlert] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleAddComment = async e => {
@@ -373,11 +375,15 @@ export const PostCard = ({ post, onClickUser }) => {
 
       if (!result.success) {
         setCommentError(result.message)
+        if (result.blockResult) {
+          setShieldAlert(result.blockResult)
+        }
         return
       }
 
       // Approved comment
       setCommentError(null)
+      setShieldAlert(null)
       setCommentText('')
       const newCommentObj = {
         user_name: author,
@@ -636,6 +642,13 @@ export const PostCard = ({ post, onClickUser }) => {
               </div>
             )}
           </div>
+        )}
+
+        {shieldAlert && (
+          <SocialShieldAlert
+            blockResult={shieldAlert}
+            onClose={() => setShieldAlert(null)}
+          />
         )}
       </div>
     </article>
